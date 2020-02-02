@@ -5,14 +5,15 @@ const path = require('path')
 const morgan = require('morgan')
 const compression = require('compression')
 const bodyParser = require('body-parser')
-// const mongoose = require('mongoose')
+const admin = require('firebase-admin')
 
-// mongoose.connect(process.env.DB_CRED, {useNewUrlParser: true})
-// const db = mongoose.connection
-// db.on('error', console.error.bind(console, 'connection error:'))
-// db.once('open', function() {
-//   console.log('MongoDB database connected successfully')
-// })
+let serviceAccount = require('./config/serviceAccountKey.json')
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+})
+
+let db = admin.firestore()
 
 const app = express()
 
