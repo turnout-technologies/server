@@ -5,15 +5,6 @@ const path = require('path')
 const morgan = require('morgan')
 const compression = require('compression')
 const bodyParser = require('body-parser')
-const admin = require('firebase-admin')
-
-let serviceAccount = require('./config/serviceAccountKey.json')
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
-})
-
-let db = admin.firestore()
 
 const app = express()
 
@@ -23,7 +14,7 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(compression())
 
 // API routes
-app.use('/api/v1', require('./api'))
+app.use('/v1', require('./api'))
 
 // Error handling endware
 app.use((err, req, res, next) => {
