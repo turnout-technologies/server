@@ -6,9 +6,10 @@ const router = Router()
 router.use('/ballots', require('./ballot'))
 
 // Expecting token on req.body
-router.post('/hello', async (req, res, next) => {
+router.get('/hello', async (req, res, next) => {
   try {
-    let decodedToken = await admin.auth().verifyIdToken(req.body.token)
+    const token = req.header('Authorization').replace('Bearer', '').trim()
+    let decodedToken = await admin.auth().verifyIdToken(token)
     res.status(200).send(decodedToken.uid)
   } catch (err) {
     next(err)
