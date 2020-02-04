@@ -3,7 +3,8 @@ const admin = require('../firebase')
 
 const router = Router()
 
-router.use('/ballots', require('./ballot'))
+router.use('/users', require('./users'))
+router.use('/ballots', require('./ballots'))
 
 // Expecting token on req.body
 router.get('/hello', async (req, res, next) => {
