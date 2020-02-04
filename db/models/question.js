@@ -5,7 +5,7 @@ const Answer = require('./answer')
 const shuffle = require('../../utils/shuffle')
 
 class Question {
-  constructor(title) {
+  constructor({ title }) {
     this.id = uuid()
     this.title = title
     this.createdAt = moment().unix()

@@ -2,7 +2,7 @@ const uuid = require('uuid/v1')
 const moment = require('moment')
 
 class Answer {
-  constructor(text) {
+  constructor({ text }) {
     this.id = uuid()
     this.text = text
   }

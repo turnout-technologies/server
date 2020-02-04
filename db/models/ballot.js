@@ -4,7 +4,7 @@ const moment = require('moment')
 const Question = require('./question')
 
 class Ballot {
-  constructor(title) {
+  constructor({ title }) {
     this.id = uuid()
     this.title = title
     this.questions = []
