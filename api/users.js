@@ -7,7 +7,10 @@ const router = Router()
 
 router.post('/', async (req, res, next) => {
   try {
-    const newUser = new User(req.body)
+    const newUser = new User({
+      ...req.body,
+      token: req.token
+    })
     await db.collection('users').doc(newUser.id).set(newUser.json())
     res.status(201).json(newUser.json())
   } catch (err) {

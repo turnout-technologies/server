@@ -16,12 +16,6 @@ app.use(compression())
 // API routes
 app.use('/v1', require('./api'))
 
-// Error handling endware
-app.use((err, req, res, next) => {
-  console.error(err.message, err)
-  res.status(err.status || 500).send(err.message || 'Internal server error.')
-})
-
 app.listen(8000, () => {
   console.log('Server started at port 8000')
 })
