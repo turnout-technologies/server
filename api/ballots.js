@@ -3,7 +3,6 @@ const moment = require('moment-timezone')
 const db = require('../db')
 
 const router = Router()
-const format = 'hh:mm:ss'
 
 router.use((req, res, next) => {
   //set the start and end times for today EST
@@ -16,7 +15,7 @@ router.use((req, res, next) => {
 
   const isBetween = moment.tz("America/New_York").isBetween(startMoment, endMoment);
 
-  if (isBetween) {
+  if (isBetween || process.env.NODE_ENV === 'development') {
     next()
   } else {
     next(new Error('Ballot is not open'))
@@ -25,16 +24,12 @@ router.use((req, res, next) => {
 
 router.get('/today', async (req, res, next) => {
   try {
-    const snapshot = await db.collection('ballots').where('date', '==', 1359932400).get()
-    // If the query has no results
-    if (snapshot.empty) res.status(500).send('Not Found')
+    const doc = await db.collection('ballots').doc('live').get()
+    if (!doc.exists) res.status(500).send('Not Found')
     else {
       // Grab the doc in data form
-      let docs = []
-      snapshot.forEach(doc => {
-        docs.push(doc.data())
-      })
-      res.json(docs)
+      const data = doc.data()
+      res.json(data)
     }
   } catch (err) {
     next(err)

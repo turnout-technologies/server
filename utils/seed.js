@@ -25,10 +25,15 @@ function seedBallots(ballotCount) {
   let count = ballotCount ? ballotCount: 10
   let Ballots = db.collection('ballots')
 
-  for (let i = 0; i < count; i++) {
+  // All ballots are seeded using their ballot.id has key
+  for (let i = 0; i < count - 1; i++) {
     let ballot = generateBallot()
     Ballots.doc(ballot.id).set(ballot.json())
   }
+
+  // One ballot is seeded using "live" flag as its key
+  let ballot = generateBallot()
+  Ballots.doc('live').set(ballot.json())
 }
 
 seedBallots(process.argv[2] ? process.argv[2] : null)
