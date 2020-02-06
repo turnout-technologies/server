@@ -18,7 +18,6 @@ class User {
       createdAt: this.createdAt,
       email: this.email,
       phone: this.phone,
-      token: this.token
     }
   }
 }
