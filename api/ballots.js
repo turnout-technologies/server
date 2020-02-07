@@ -18,7 +18,9 @@ router.use((req, res, next) => {
   if (isBetween || process.env.NODE_ENV === 'development') {
     next()
   } else {
-    next(new Error('Ballot is not open'))
+    const err = new Error('Ballot is not open')
+    err.status = 403
+    next(err)
   }
 })
 
@@ -29,7 +31,14 @@ router.get('/today', async (req, res, next) => {
     else {
       // Grab the doc in data form
       const data = doc.data()
-      res.json(data)
+      // Normalize the data
+      const ballot = {
+        id: data.id,
+        createdAt: data.createdAt,
+        questions: data.questions,
+      }
+
+      res.json(ballot)
     }
   } catch (err) {
     next(err)
