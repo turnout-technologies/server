@@ -3,20 +3,27 @@ const moment = require('moment-timezone')
 const db = require('../db')
 
 const router = Router()
+const est = 'America/New_York'
+let ballotCache;
 
 router.use((req, res, next) => {
   //set the start and end times for today EST
-  const start = moment.tz("America/New_York").format("YYYY-MM-DD") + " 18:00"
-  const end = moment.tz("America/New_York").format("YYYY-MM-DD") + " 22:00"
+  const start = moment.tz(est).format("YYYY-MM-DD") + " 18:00"
+  const end = moment.tz(est).format("YYYY-MM-DD") + " 22:00"
 
   //convert the times to moments so we can do a compare
-  const startMoment = moment.tz(start, "America/New_York")
-  const endMoment = moment.tz(end, "America/New_York")
+  const startMoment = moment.tz(start, est)
+  const endMoment = moment.tz(end, est)
 
-  const isBetween = moment.tz("America/New_York").isBetween(startMoment, endMoment)
+  const isBetween = moment.tz(est).isBetween(startMoment, endMoment)
 
   if (isBetween || process.env.NODE_ENV === 'development') {
-    next()
+    // If ballotCache exists AND it is matched with current date, return cache
+    if (ballotCache && moment.tz(moment.unix(ballotCache.date), est).isSame(startMoment)) {
+      console.log('used cache')
+      res.status(200).json(ballotCache)
+    }
+    else next()
   } else {
     const err = new Error('Ballot is not open')
     err.status = 403
@@ -26,8 +33,8 @@ router.use((req, res, next) => {
 
 router.get('/today', async (req, res, next) => {
   try {
-    const targetDate = moment.tz(moment.tz("America/New_York").format("YYYY-MM-DD") + " 18:00", "America/New_York")
-
+    const targetDate = moment.tz(moment.tz(est).format("YYYY-MM-DD") + " 18:00", est)
+    console.log('retrieving')
     const snapshot = await db.collection('ballots').where('date', '==', targetDate.unix()).get()
     if (snapshot.empty) res.status(500).send('Not Found')
     else {
@@ -47,12 +54,24 @@ router.get('/today', async (req, res, next) => {
         questions: data.questions,
       }
 
-      res.json(ballot)
+      ballotCache = ballot
+
+      res.status(200).json(ballot)
     }
   } catch (err) {
     next(err)
   }
 
+})
+
+router.post('/today/:ballot_id', async (req, res, next) => {
+  try {
+    const ballotId = req.params.ballot_id
+    const response = await db.collection('ballots').doc(ballotId).collection('responses').doc(req.body.userId).set(req.body.response)
+    res.status(201).json(response.data())
+  } catch (err) {
+    next(err)
+  }
 })
 
 module.exports = router
