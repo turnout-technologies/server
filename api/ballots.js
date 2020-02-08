@@ -21,9 +21,9 @@ router.use((req, res, next) => {
     // If ballotCache exists AND it is matched with current date, return cache
     if (ballotCache && moment.tz(moment.unix(ballotCache.date), est).isSame(startMoment)) {
       console.log('used cache')
-      res.status(200).json(ballotCache)
+      req.ballot = ballotCache
     }
-    else next()
+    next()
   } else {
     const err = new Error('Ballot is not open')
     err.status = 403
@@ -33,30 +33,34 @@ router.use((req, res, next) => {
 
 router.get('/today', async (req, res, next) => {
   try {
-    const targetDate = moment.tz(moment.tz(est).format("YYYY-MM-DD") + " 18:00", est)
-    console.log('retrieving')
-    const snapshot = await db.collection('ballots').where('date', '==', targetDate.unix()).get()
-    if (snapshot.empty) res.status(500).send('Not Found')
+    // If a cached version is available return that one
+    if (req.ballot) res.status(200).json(ballotCache)
     else {
-      const docs = [];
-      // Grab the doc in data form
-      snapshot.forEach(doc => {
-        docs.push(doc.data())
-      })
+      console.log('retrieving')
+      const targetDate = moment.tz(moment.tz(est).format("YYYY-MM-DD") + " 18:00", est)
+      const snapshot = await db.collection('ballots').where('date', '==', targetDate.unix()).get()
+      if (snapshot.empty) res.status(500).send('Not Found')
+      else {
+        const docs = [];
+        // Grab the doc in data form
+        snapshot.forEach(doc => {
+          docs.push(doc.data())
+        })
 
-      if (docs.length !== 1) throw new Error('Multiple Live Ballots')
+        if (docs.length !== 1) throw new Error('Multiple Live Ballots')
 
-      const data = docs[0]
-      const ballot = {
-        id: data.id,
-        createdAt: data.createdAt,
-        date: data.date,
-        questions: data.questions,
+        const data = docs[0]
+        const ballot = {
+          id: data.id,
+          createdAt: data.createdAt,
+          date: data.date,
+          questions: data.questions,
+        }
+
+        ballotCache = ballot
+
+        res.status(200).json(ballot)
       }
-
-      ballotCache = ballot
-
-      res.status(200).json(ballot)
     }
   } catch (err) {
     next(err)
@@ -67,8 +71,10 @@ router.get('/today', async (req, res, next) => {
 router.post('/today/:ballot_id', async (req, res, next) => {
   try {
     const ballotId = req.params.ballot_id
+    console.log(req.ballot)
+    if (!req.ballot || req.ballot.id !== ballotId) throw new Error('Ilegal ballot submission')
     const response = await db.collection('ballots').doc(ballotId).collection('responses').doc(req.body.userId).set(req.body.response)
-    res.status(201).json(response.data())
+    res.status(201).send('Response successfully submitted')
   } catch (err) {
     next(err)
   }
