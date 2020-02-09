@@ -1,9 +1,8 @@
-const uuid = require('uuid/v1')
 const moment = require('moment')
 
 class User {
-  constructor({ name, email, phone, token}) {
-    this.id = uuid()
+  constructor({ uid, name, email, phone, token}) {
+    this.id = uid
     this.name = name
     this.email = email
     this.createdAt = moment().unix()

@@ -5,8 +5,6 @@ const router = Router()
 
 // Validate request token. If validation fails, gets passed onto error handling endware
 router.use(async (req, res, next) => {
-  // If we are in development, skip authorization
-  if (process.env.NODE_ENV === 'development') return next()
   try {
     const authHeader = req.header('Authorization')
     if (!authHeader) {
@@ -17,6 +15,7 @@ router.use(async (req, res, next) => {
 
     const token = authHeader.replace('Bearer', '').trim()
     req.decodedToken = await admin.auth().verifyIdToken(token)
+    req.uid = decodedToken.uid
     req.token = token
     next()
   } catch (err) {
