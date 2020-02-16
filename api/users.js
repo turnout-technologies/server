@@ -9,7 +9,6 @@ router.post('/', async (req, res, next) => {
   try {
     const newUser = new User({
       ...req.body,
-      token: req.token,
       id: req.uid
     })
     await db.collection('users').doc(newUser.id).set(newUser.json())
