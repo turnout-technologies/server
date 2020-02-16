@@ -17,6 +17,7 @@ class User {
       createdAt: this.createdAt,
       email: this.email,
       phone: this.phone,
+      avatarURL: this.avatarURL
     }
   }
 }
