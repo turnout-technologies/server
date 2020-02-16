@@ -39,7 +39,7 @@ router.get('/today', async (req, res, next) => {
       console.log('retrieving')
       const targetDate = moment.tz(moment.tz(est).format("YYYY-MM-DD") + " 18:00", est)
       const snapshot = await db.collection('ballots').where('date', '==', targetDate.unix()).get()
-      if (snapshot.empty) res.status(500).send('Not Found')
+      if (snapshot.empty) res.status(204).send('Not Found')
       else {
         const docs = [];
         // Grab the doc in data form

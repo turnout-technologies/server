@@ -14,6 +14,7 @@ router.use(async (req, res, next) => {
     }
 
     const token = authHeader.replace('Bearer', '').trim()
+    console.log(token)
     req.decodedToken = await admin.auth().verifyIdToken(token)
     req.uid = req.decodedToken.uid
     req.token = token
