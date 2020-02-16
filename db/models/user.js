@@ -1,13 +1,12 @@
 const moment = require('moment')
 
 class User {
-  constructor({ uid, name, email, phone, token}) {
+  constructor({ uid, name, email, phone }) {
     this.id = uid
     this.name = name
     this.email = email
     this.createdAt = moment().unix()
     this.phone = phone
-    this.token = token
   }
 
   json() {
