@@ -72,9 +72,14 @@ router.get('/today', async (req, res, next) => {
 router.post('/today/:ballot_id', async (req, res, next) => {
   try {
     const ballotId = req.params.ballot_id
-    console.log(req.ballot)
     if (!req.ballot || req.ballot.id !== ballotId) throw new Error('Ilegal ballot submission')
-    const response = await db.collection('ballots').doc(ballotId).collection('responses').doc(req.body.userId).set(req.body.response)
+
+    const response = {
+      ...req.body.response,
+      userId: req.body.userId,
+    }
+
+    await db.collection('ballots').doc(ballotId).collection('responses').doc(req.body.userId).set(response)
     res.status(201).send('Response successfully submitted')
   } catch (err) {
     next(err)
