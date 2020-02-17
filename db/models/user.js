@@ -1,8 +1,8 @@
 const moment = require('moment')
 
 class User {
-  constructor({ uid, name, email, phone, avatarURL }) {
-    this.id = uid
+  constructor({ id, name, email, phone, avatarURL }) {
+    this.id = id
     this.name = name
     this.email = email
     this.createdAt = moment().unix()

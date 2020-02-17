@@ -20,7 +20,6 @@ router.use((req, res, next) => {
   if (isBetween || process.env.NODE_ENV === 'development') {
     // If ballotCache exists AND it is matched with current date, return cache
     if (ballotCache && moment.tz(moment.unix(ballotCache.date), est).isSame(startMoment)) {
-      console.log('used cache')
       req.ballot = ballotCache
     }
     next()
@@ -36,7 +35,6 @@ router.get('/today', async (req, res, next) => {
     // If a cached version is available return that one
     if (req.ballot) res.status(200).json(ballotCache)
     else {
-      console.log('retrieving')
       const targetDate = moment.tz(moment.tz(est).format("YYYY-MM-DD") + " 18:00", est)
       const snapshot = await db.collection('ballots').where('date', '==', targetDate.unix()).get()
       if (snapshot.empty) res.status(500).json({
