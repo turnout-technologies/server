@@ -37,10 +37,7 @@ router.get('/today', async (req, res, next) => {
     else {
       const targetDate = moment.tz(moment.tz(est).format("YYYY-MM-DD") + " 18:00", est)
       const snapshot = await db.collection('ballots').where('date', '==', targetDate.unix()).get()
-      if (snapshot.empty) res.status(500).json({
-        error_name: 'NoBallotFound',
-        error_description: 'There was no matching ballot with today\'s date'
-      })
+      if (snapshot.empty) throw new Error('No Ballot found today')
       else {
         const docs = [];
         // Grab the doc in data form
@@ -81,6 +78,22 @@ router.post('/today/:ballot_id', async (req, res, next) => {
 
     await db.collection('ballots').doc(ballotId).collection('responses').doc(req.body.userId).set(response)
     res.status(201).send('Response successfully submitted')
+  } catch (err) {
+    next(err)
+  }
+})
+
+router.get('/:ballot_id/results', async (req, res, next) => {
+  try {
+    const ballotId = req.params.ballot_id
+
+    const doc = await db.collection('ballots').doc(ballotId).get()
+    if(!doc.exists) throw new Error('Invalid ballot_id provided')
+
+    const ballot = doc.data()
+
+    if (!ballot.processed) throw new Error('Ballot has not been processed yet')
+    res.status(200).json(ballot.results.aggregate)
   } catch (err) {
     next(err)
   }
