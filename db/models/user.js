@@ -8,6 +8,7 @@ class User {
     this.createdAt = moment().unix()
     this.phone = phone
     this.avatarURL = avatarURL
+    this.points = 0
   }
 
   json() {
@@ -17,7 +18,8 @@ class User {
       createdAt: this.createdAt,
       email: this.email,
       phone: this.phone,
-      avatarURL: this.avatarURL
+      avatarURL: this.avatarURL,
+      points: this.points,
     }
   }
 }
