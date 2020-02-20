@@ -1,5 +1,4 @@
 const { Router } = require('express')
-const moment = require('moment')
 const db = require('../db')
 const User = require('../db/models/user')
 
@@ -7,8 +6,9 @@ const router = Router()
 
 router.get('/leaderboard', async (req, res, next) => {
   try {
-    const snapshot = await db.collection('users').orderBy('points', 'desc').limit(100).get()
-    if (snapshot.empty) throw new Error('No users for leaderboard to show')
+    // Request Query defaults to string
+    const snapshot = await db.collection('users').orderBy('points', 'desc').limit(parseInt(req.query.limit) || 100).get()
+    if (snapshot.empty) res.status(200).json({ leaderboard: [] })
     const users = []
     // Grab the doc in data form
     snapshot.forEach(doc => {
