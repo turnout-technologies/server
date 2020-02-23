@@ -9,6 +9,7 @@ class User {
     this.phone = phone
     this.avatarURL = avatarURL
     this.points = 0
+    this.pushToken = ''
   }
 
   json() {
