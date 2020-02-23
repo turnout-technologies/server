@@ -93,7 +93,22 @@ router.get('/:ballot_id/results', async (req, res, next) => {
     const ballot = doc.data()
 
     if (!ballot.processed) throw new Error('Ballot has not been processed yet')
-    res.status(200).json(ballot.results.aggregate)
+
+    const response = {
+      date: ballot.date,
+      questions: ballot.questions,
+      aggregate: ballot.results.aggregate,
+    }
+
+    const requestor = req.query.requestor
+    if (requestor) {
+      const responseDoc = await db.collection('ballots').doc(ballotId).collection('responses').doc(requestor).get()
+      let ballotResponse = null
+      if(responseDoc.exists) ballotResponse = responseDoc.data()
+      response.response = ballotResponse
+    }
+
+    res.status(200).json(response)
   } catch (err) {
     next(err)
   }
