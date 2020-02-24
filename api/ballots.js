@@ -6,7 +6,7 @@ const router = Router()
 const est = 'America/New_York'
 let ballotCache;
 
-router.use((req, res, next) => {
+const validateTimeAndCache = (req, res, next) => {
   //set the start and end times for today EST
   const start = moment.tz(est).format("YYYY-MM-DD") + " 18:00"
   const end = moment.tz(est).format("YYYY-MM-DD") + " 22:00"
@@ -28,9 +28,9 @@ router.use((req, res, next) => {
     err.status = 403
     next(err)
   }
-})
+}
 
-router.get('/today', async (req, res, next) => {
+router.get('/today', validateTimeAndCache, async (req, res, next) => {
   try {
     // If a cached version is available return that one
     if (req.ballot) res.status(200).json(ballotCache)
@@ -66,10 +66,10 @@ router.get('/today', async (req, res, next) => {
 
 })
 
-router.post('/today/:ballot_id', async (req, res, next) => {
+router.post('/today/:ballot_id', validateTimeAndCache, async (req, res, next) => {
   try {
     const ballotId = req.params.ballot_id
-    if (!req.ballot || req.ballot.id !== ballotId) throw new Error('Ilegal ballot submission')
+    if (!req.ballot || req.ballot.id !== ballotId) throw new Error('Illegal ballot submission')
 
     const response = {
       ...req.body.response,
@@ -83,30 +83,55 @@ router.post('/today/:ballot_id', async (req, res, next) => {
   }
 })
 
+const getBallotResults = async (ballotId, requestor) => {
+  const doc = await db.collection('ballots').doc(ballotId).get()
+  if(!doc.exists) throw new Error('Invalid ballot_id provided')
+
+  const ballot = doc.data()
+
+  if (!ballot.processed) throw new Error('Ballot has not been processed yet')
+
+  const response = {
+    date: ballot.date,
+    questions: ballot.questions,
+    aggregate: ballot.results.aggregate,
+  }
+
+
+  if (requestor) {
+    const responseDoc = await db.collection('ballots').doc(ballotId).collection('responses').doc(requestor).get()
+    let ballotResponse = null
+    if (responseDoc.exists) ballotResponse = responseDoc.data()
+    response.response = ballotResponse
+  }
+
+  return response
+}
+
+router.get('/latest/results', async (req, res, next) => {
+  try {
+    const doc = await db.collection('ballots').doc('meta').get()
+    if (!doc.exists) throw new Error('Ballot meta is not defined')
+
+    const meta = doc.data()
+
+    const ballotId = meta.latestBallotId
+    if (!ballotId) throw new Error('No latest results to show')
+
+    const requestor = req.query.requestor
+    const response = await getBallotResults(ballotId, requestor)
+
+    res.status(200).json(response)
+  } catch (err) {
+    next(err)
+  }
+})
+
 router.get('/:ballot_id/results', async (req, res, next) => {
   try {
     const ballotId = req.params.ballot_id
-
-    const doc = await db.collection('ballots').doc(ballotId).get()
-    if(!doc.exists) throw new Error('Invalid ballot_id provided')
-
-    const ballot = doc.data()
-
-    if (!ballot.processed) throw new Error('Ballot has not been processed yet')
-
-    const response = {
-      date: ballot.date,
-      questions: ballot.questions,
-      aggregate: ballot.results.aggregate,
-    }
-
     const requestor = req.query.requestor
-    if (requestor) {
-      const responseDoc = await db.collection('ballots').doc(ballotId).collection('responses').doc(requestor).get()
-      let ballotResponse = null
-      if(responseDoc.exists) ballotResponse = responseDoc.data()
-      response.response = ballotResponse
-    }
+    const response = await getBallotResults(ballotId, requestor)
 
     res.status(200).json(response)
   } catch (err) {
