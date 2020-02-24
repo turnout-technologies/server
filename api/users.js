@@ -1,4 +1,5 @@
 const { Router } = require('express')
+const { Expo } = require('expo-server-sdk')
 const db = require('../db')
 const User = require('../db/models/user')
 
@@ -55,6 +56,49 @@ router.post('/', async (req, res, next) => {
     next(err)
   }
 
+})
+
+router.get('/:id', async (req, res, next) => {
+  try {
+    // If the requestor is not the same as the user to be edited
+    if (req.params.id !== req.uid) {
+      const error = new Error('Unauthorized User Request')
+      error.status = 401
+      throw error
+    }
+
+    const doc = await db.collection('users').doc(req.uid).get()
+
+    res.status(200).json(doc.data())
+  } catch (err) {
+    next(err)
+  }
+})
+
+
+router.put('/:id/push-token', async (req, res, next) => {
+  try {
+    // If the requestor is not the same as the user to be edited
+    if (req.params.id !== req.uid) {
+      const error = new Error('Unauthorized User Request')
+      error.status = 401
+      throw error
+    }
+
+    const { pushToken } = req.body
+    // Check that all your push tokens appear to be valid Expo push tokens
+    if (!Expo.isExpoPushToken(pushToken)) {
+      throw new Error(`Push token ${pushToken} is not a valid Expo push token`)
+    }
+
+    const doc = await db.collection('users').doc(req.uid).update({
+      pushToken
+    })
+
+    res.status(200).end()
+  } catch (err) {
+    next(err)
+  }
 })
 
 module.exports = router
