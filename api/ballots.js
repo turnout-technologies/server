@@ -132,8 +132,7 @@ router.get('/latest/results', async (req, res, next) => {
 router.get('/:ballot_id/results', async (req, res, next) => {
   try {
     const ballotId = req.params.ballot_id
-    const requestor = req.query.requestor
-    const response = await getBallotResults(ballotId, requestor)
+    const response = await getBallotResults(ballotId, req.uid)
 
     res.status(200).json(response)
   } catch (err) {
