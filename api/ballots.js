@@ -83,7 +83,7 @@ router.post('/today/:ballot_id', validateTimeAndCache, async (req, res, next) =>
   }
 })
 
-const getBallotResults = async (ballotId, requestor) => {
+const getBallotResults = async (ballotId, requestorId) => {
   const doc = await db.collection('ballots').doc(ballotId).get()
   if(!doc.exists) throw new Error('Invalid ballot_id provided')
 
@@ -91,35 +91,37 @@ const getBallotResults = async (ballotId, requestor) => {
 
   if (!ballot.processed) throw new Error('Ballot has not been processed yet')
 
-  const response = {
+  const res = {
     date: ballot.date,
+    id: ballot.id,
     questions: ballot.questions,
     aggregate: ballot.results.aggregate,
+    winningAnswers: ballot.results.winningAnswers,
+    userPoints: null,
+    response: null,
   }
 
+  const responseDoc = await db.collection('ballots').doc(ballotId).collection('responses').doc(requestorId).get()
 
-  if (requestor) {
-    const responseDoc = await db.collection('ballots').doc(ballotId).collection('responses').doc(requestor).get()
-    let ballotResponse = null
-    if (responseDoc.exists) ballotResponse = responseDoc.data()
-    response.response = ballotResponse
+  if (responseDoc.exists) {
+    res.response = responseDoc.data()
+    res.userPoints = ballot.results.userPoints[requestorId]
   }
 
-  return response
+  return res
 }
 
 router.get('/latest/results', async (req, res, next) => {
   try {
-    const doc = await db.collection('ballots').doc('meta').get()
+    const doc = await db.collection('meta').doc('ballot').get()
     if (!doc.exists) throw new Error('Ballot meta is not defined')
 
     const meta = doc.data()
 
-    const ballotId = meta.latestBallotId
+    const ballotId = meta.latestProcessedBallotId
     if (!ballotId) throw new Error('No latest results to show')
 
-    const requestor = req.query.requestor
-    const response = await getBallotResults(ballotId, requestor)
+    const response = await getBallotResults(ballotId, req.uid)
 
     res.status(200).json(response)
   } catch (err) {
