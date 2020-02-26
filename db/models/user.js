@@ -1,7 +1,7 @@
 const moment = require('moment')
 
 class User {
-  constructor({ id, name, email, phone, avatarURL }) {
+  constructor({ id, name, email, phone, avatarURL, pushToken }) {
     this.id = id
     this.name = name
     this.email = email
@@ -9,7 +9,7 @@ class User {
     this.phone = phone
     this.avatarURL = avatarURL
     this.points = 0
-    this.pushToken = ''
+    this.pushToken = pushToken ? pushToken : ''
   }
 
   json() {
