@@ -21,6 +21,7 @@ class User {
       phone: this.phone,
       avatarURL: this.avatarURL,
       points: this.points,
+      pushToken: this.pushToken,
     }
   }
 }
