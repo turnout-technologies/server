@@ -11,11 +11,11 @@ const app = express()
 
 app.use(NODE_ENV === 'production' ? morgan('combined') : morgan('dev'))
 if (NODE_ENV === 'production') {
+  // Force HTTPS in production
   app.use((req, res, next) => {
-    console.log(req.headers['x-forwarded-proto'])
-    console.log(req.headers['x-forwarded-proto'] === 'https')
+    // Heroku forwards original protocol request header
     if (req.headers['x-forwarded-proto'] !== 'https') {
-        return res.status(403).send({message: 'SSL required'})
+        return res.status(403).send({ message: 'SSL required' })
     }
     // allow the request to continue
     next()
