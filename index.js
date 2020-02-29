@@ -9,11 +9,12 @@ const bodyParser = require('body-parser')
 
 const app = express()
 
+app.use(NODE_ENV === 'production' ? morgan('combined') : morgan('dev'))
 if (NODE_ENV === 'production') {
   const forceSsl = require('force-ssl-heroku')
   app.use(forceSsl)
 }
-app.use(NODE_ENV === 'production' ? morgan('combined') : morgan('dev'))
+
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(compression())
