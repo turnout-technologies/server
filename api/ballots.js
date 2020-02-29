@@ -17,7 +17,7 @@ const validateTimeAndCache = (req, res, next) => {
 
   const isBetween = moment.tz(est).isBetween(startMoment, endMoment)
 
-  if (isBetween || process.env.NODE_ENV === 'development') {
+  if (isBetween || process.env.NODE_ENV === 'development' || process.env.HEROKU_ENVIRONMENT === 'alpha-development') {
     // If ballotCache exists AND it is matched with current date, return cache
     if (ballotCache && moment.tz(moment.unix(ballotCache.date), est).isSame(startMoment)) {
       req.ballot = ballotCache
