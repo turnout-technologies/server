@@ -1,4 +1,5 @@
-require('dotenv').config()
+const { NODE_ENV } = process.env
+if (NODE_ENV !== 'production') require('dotenv').config()
 
 const express = require('express')
 const path = require('path')
@@ -8,7 +9,11 @@ const bodyParser = require('body-parser')
 
 const app = express()
 
-app.use(process.env.NODE_ENV === 'production' ? morgan('combined') : morgan('dev'))
+if (NODE_ENV === 'production') {
+  const forceSsl = require('force-ssl-heroku')
+  app.use(forceSsl)
+}
+app.use(NODE_ENV === 'production' ? morgan('combined') : morgan('dev'))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(compression())
