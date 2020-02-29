@@ -87,7 +87,7 @@ router.put('/:id/push-token', async (req, res, next) => {
 
     const { pushToken } = req.body
     // Check that all your push tokens appear to be valid Expo push tokens
-    if (!Expo.isExpoPushToken(pushToken)) {
+    if (pushToken && !Expo.isExpoPushToken(pushToken)) {
       throw new Error(`Push token ${pushToken} is not a valid Expo push token`)
     }
 
