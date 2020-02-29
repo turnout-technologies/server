@@ -1,8 +1,10 @@
 const { Router } = require('express')
 const uuid = require('uuid/v1')
 const Joi = require('@hapi/joi');
-const db = require('../db')
 const moment = require('moment')
+
+const db = require('../db')
+
 
 const router = Router()
 const contactSchema = Joi.object({

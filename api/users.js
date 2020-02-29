@@ -1,9 +1,17 @@
 const { Router } = require('express')
 const { Expo } = require('expo-server-sdk')
+const Joi = require('@hapi/joi');
+const moment = require('moment')
 const db = require('../db')
-const User = require('../db/models/user')
 
 const router = Router()
+const userSchema = Joi.object({
+  name: Joi.string().min(1).required(),
+  email: Joi.string().email().required(),
+  phone: Joi.string(),
+  pushToken: Joi.string(),
+  avatarURL: Joi.string().uri(),
+})
 
 router.get('/leaderboard', async (req, res, next) => {
   try {
@@ -46,12 +54,20 @@ router.get('/leaderboard', async (req, res, next) => {
 
 router.post('/', async (req, res, next) => {
   try {
-    const newUser = new User({
-      ...req.body,
-      id: req.uid
-    })
-    await db.collection('users').doc(newUser.id).set(newUser.json())
-    res.status(201).json(newUser.json())
+    const { name, email, phone, pushToken, avatarURL } = req.body
+    await userSchema.validateAsync({ name, email, phone, pushToken, avatarURL });
+    const newUser = {
+      id: req.uid,
+      createdAt: moment().unix(),
+      points: 0,
+      name,
+      email,
+      phone,
+      pushToken: pushToken ? pushToken : '',
+      avatarURL,
+    }
+    await db.collection('users').doc(newUser.id).set(newUser)
+    res.status(201).json(newUser)
   } catch (err) {
     next(err)
   }
