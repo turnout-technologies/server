@@ -7,6 +7,7 @@ const router = Router()
 router.use(async (req, res, next) => {
   try {
     const authHeader = req.header('Authorization')
+    console.error('Authorization Detected')
     if (!authHeader) {
       const err = new Error('Invalid Authorization Header')
       err.status = 401
@@ -16,6 +17,7 @@ router.use(async (req, res, next) => {
     const token = authHeader.replace('Bearer', '').trim()
     req.decodedToken = await admin.auth().verifyIdToken(token)
     .catch(() => {
+      console.error('Bad Token Detected')
       const err = new Error('Invalid Authorization Token')
       err.status = 401
       throw err
