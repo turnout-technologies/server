@@ -14,7 +14,7 @@ if (NODE_ENV === 'production') {
   app.use((req, res, next) => {
     console.log(req['x-forwarded-proto'])
     console.log(req['x-forwarded-proto'] === 'https')
-    if (req.['x-forwarded-proto'] !== 'https') {
+    if (req['x-forwarded-proto'] !== 'https') {
         return res.status(403).send({message: 'SSL required'})
     }
     // allow the request to continue
