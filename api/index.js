@@ -29,6 +29,7 @@ router.use(async (req, res, next) => {
   }
 })
 
+router.use('/contact', require('./contact'))
 router.use('/users', require('./users'))
 router.use('/ballots', require('./ballots'))
 
