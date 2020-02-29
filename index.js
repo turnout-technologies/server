@@ -1,4 +1,4 @@
-// require('dotenv').config()
+require('dotenv').config()
 
 const express = require('express')
 const path = require('path')
@@ -16,6 +16,6 @@ app.use(compression())
 // API routes
 app.use('/v1', require('./api'))
 
-app.listen(8000, () => {
+app.listen(process.env.PORT || 8000, () => {
   console.log('Server started at port 8000')
 })
