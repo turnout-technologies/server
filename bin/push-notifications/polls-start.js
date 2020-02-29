@@ -1,7 +1,9 @@
 const { Expo } = require('expo-server-sdk')
 const admin = require('firebase-admin')
+const moment = require('moment-timezone')
 
 let serviceAccount = require('../config/serviceAccountKey.json')
+const est = 'America/New_York'
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
@@ -10,6 +12,8 @@ admin.initializeApp({
 const db = admin.firestore()
 // Create a new Expo SDK client
 let expo = new Expo()
+
+const checkBallotToday
 
 const retrieveVoters = async () => {
   const snapshot = await db.collection('users').get()
@@ -64,8 +68,11 @@ const sendNotifications = async () => {
       console.log(ticketChunk);
       tickets.push(...ticketChunk);
     }
+
+    process.exit(0)
   } catch (err) {
     console.error(err)
+    process.exit(1)
   }
 }
 
