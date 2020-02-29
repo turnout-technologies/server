@@ -8,7 +8,6 @@ const router = Router()
 const userSchema = Joi.object({
   name: Joi.string().min(1).required(),
   email: Joi.string().email().required(),
-  phone: Joi.string(),
   pushToken: Joi.string(),
   avatarURL: Joi.string().uri(),
 })
@@ -54,15 +53,14 @@ router.get('/leaderboard', async (req, res, next) => {
 
 router.post('/', async (req, res, next) => {
   try {
-    const { name, email, phone, pushToken, avatarURL } = req.body
-    await userSchema.validateAsync({ name, email, phone, pushToken, avatarURL });
+    const { name, email, pushToken, avatarURL } = req.body
+    await userSchema.validateAsync({ name, email, pushToken, avatarURL });
     const newUser = {
       id: req.uid,
       createdAt: moment().unix(),
       points: 0,
       name,
       email,
-      phone,
       pushToken: pushToken ? pushToken : '',
       avatarURL,
     }
