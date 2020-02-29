@@ -1,4 +1,4 @@
-const {
+let {
   FIREBASE_TYPE,
   FIREBASE_PROJECT_ID,
   FIREBASE_PRIVATE_KEY_ID,
@@ -10,6 +10,10 @@ const {
   FIREBASE_AUTH_PROVIDER,
   FIREBASE_CLIENT
 } = process.env
+
+if (process.env.NODE_ENV === 'production') {
+  FIREBASE_PRIVATE_KEY = FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
+}
 
 console.log({
   FIREBASE_TYPE,
@@ -28,7 +32,7 @@ module.exports = {
   "type": FIREBASE_TYPE,
   "project_id": FIREBASE_PROJECT_ID,
   "private_key_id": FIREBASE_PRIVATE_KEY_ID,
-  "private_key": JSON.parse(FIREBASE_PRIVATE_KEY),
+  "private_key": FIREBASE_PRIVATE_KEY,
   "client_email": FIREBASE_CLIENT_EMAIL,
   "client_id": FIREBASE_CLIENT_ID,
   "auth_uri": FIREBASE_AUTH_URI,
