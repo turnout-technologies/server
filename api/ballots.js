@@ -1,5 +1,6 @@
 const { Router } = require('express')
 const moment = require('moment-timezone')
+const Joi = require('@hapi/joi');
 const db = require('../db')
 
 const router = Router()
@@ -63,7 +64,13 @@ router.get('/today', validateTimeAndCache, async (req, res, next) => {
   } catch (err) {
     next(err)
   }
+})
 
+const responseSchema = Joi.object({
+  userId: Joi.string().min(1).required(),
+  response: Joi.object({
+
+  }),
 })
 
 router.post('/today/:ballot_id', validateTimeAndCache, async (req, res, next) => {
@@ -73,10 +80,10 @@ router.post('/today/:ballot_id', validateTimeAndCache, async (req, res, next) =>
 
     const response = {
       ...req.body.response,
-      userId: req.body.userId,
+      userId: req.uid,
     }
 
-    await db.collection('ballots').doc(ballotId).collection('responses').doc(req.body.userId).set(response)
+    await db.collection('ballots').doc(ballotId).collection('responses').doc(req.uid).set(response)
     res.status(201).send('Response successfully submitted')
   } catch (err) {
     next(err)

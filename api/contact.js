@@ -9,7 +9,7 @@ const router = Router()
 const contactSchema = Joi.object({
   type: Joi.string().valid('bug', 'happy', 'sad', 'suggestion', 'question_idea').required(),
   message: Joi.string().min(1).required(),
-  filename: Joi.string().allow('')
+  filename: Joi.string().allow('').required(),
 })
 
 router.post('/', async (req, res, next) => {

@@ -8,8 +8,8 @@ const router = Router()
 const userSchema = Joi.object({
   name: Joi.string().min(1).required(),
   email: Joi.string().email().required(),
-  pushToken: Joi.string(),
-  avatarURL: Joi.string().uri(),
+  pushToken: Joi.string().allow('').required(),
+  avatarURL: Joi.string().uri().allow('').required(),
 })
 
 router.get('/leaderboard', async (req, res, next) => {
@@ -90,6 +90,10 @@ router.get('/:id', async (req, res, next) => {
 })
 
 
+const tokenSchema = Joi.object({
+  pushToken: Joi.string().allow('').required()
+})
+
 router.put('/:id/push-token', async (req, res, next) => {
   try {
     // If the requestor is not the same as the user to be edited
@@ -100,6 +104,7 @@ router.put('/:id/push-token', async (req, res, next) => {
     }
 
     const { pushToken } = req.body
+    await tokenSchema.validateAsync({ pushToken });
     // Check that all your push tokens appear to be valid Expo push tokens
     if (pushToken && !Expo.isExpoPushToken(pushToken)) {
       throw new Error(`Push token ${pushToken} is not a valid Expo push token`)
