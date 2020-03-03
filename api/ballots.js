@@ -38,8 +38,10 @@ router.get('/today', validateTimeAndCache, async (req, res, next) => {
     else {
       const targetDate = moment.tz(moment.tz(est).format("YYYY-MM-DD") + " 18:00", est)
       const snapshot = await db.collection('ballots').where('date', '==', targetDate.unix()).get()
-      if (snapshot.empty) throw new Error('No Ballot found today')
-      else {
+      if (snapshot.empty) {
+        console.error('No ballot today!')
+        return res.status(200).end()
+      } else {
         const docs = [];
         // Grab the doc in data form
         snapshot.forEach(doc => {
@@ -67,16 +69,17 @@ router.get('/today', validateTimeAndCache, async (req, res, next) => {
 })
 
 const responseSchema = Joi.object({
-  userId: Joi.string().min(1).required(),
-  response: Joi.object({
-
-  }),
+  response: Joi.object(),
 })
 
 router.post('/today/:ballot_id', validateTimeAndCache, async (req, res, next) => {
   try {
     const ballotId = req.params.ballot_id
-    if (!req.ballot || req.ballot.id !== ballotId) throw new Error('Illegal ballot submission')
+    if (!req.ballot || req.ballot.id !== ballotId) {
+      const err = new Error('Illegal ballot submission')
+      err.status = 400
+      throw err
+    }
 
     const response = {
       ...req.body.response,
@@ -126,7 +129,10 @@ router.get('/latest/results', async (req, res, next) => {
     const meta = doc.data()
 
     const ballotId = meta.latestProcessedBallotId
-    if (!ballotId) throw new Error('No latest results to show')
+    if (!ballotId) {
+      console.error('No latest results to show')
+      res.status(200).end()
+    }
 
     const response = await getBallotResults(ballotId, req.uid)
 
