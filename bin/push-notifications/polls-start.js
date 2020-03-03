@@ -45,9 +45,13 @@ const retrieveTokens = async () => {
 
 const sendNotifications = async () => {
   try {
+    console.log('Beginning Push Notifications Job...')
     const isLive = await checkBallotToday()
-    if (isLive) {
+    if (!isLive) console.log('No live ballot today!')
+    else {
+      console.log('Retrieving Expo Push Tokens...')
       const pushTokens = await retrieveTokens()
+      console.log(`Sending Push Notifications to ${pushTokens.length} users...`)
       // Create the messages that you want to send to clents
       let messages = []
       for (let pushToken of pushTokens) {
