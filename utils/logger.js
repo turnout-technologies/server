@@ -3,7 +3,7 @@ switch(process.env.NODE_ENV) {
   case 'test':
     const Logger = require('heroku-logger').Logger
     logger = new Logger({
-      level: 'error'
+      level: 'none'
     })
 
     module.exports = logger
