@@ -1,6 +1,10 @@
-const dotenv = require('dotenv')
-const path = require('path')
-dotenv.config({ path: path.resolve(__dirname, '../.env.test') })
+const { CI, FIREBASE_TEST_EMAIL, FIREBASE_TEST_PASSWORD } = process.env
+
+if (!CI) {
+  const dotenv = require('dotenv')
+  const path = require('path')
+  dotenv.config({ path: path.resolve(__dirname, '../.env.test') })
+}
 
 const chai = require('chai'),
       chaitHttp = require('chai-http')
@@ -11,6 +15,7 @@ const should = chai.should()
 
 const firebase = require("firebase")
 const firebaseConfig = require('../config/testConfig')
+
 
 describe('API Middleware', function () {
   describe('Authorization Header Error Validation', function() {
@@ -32,7 +37,7 @@ describe('API Middleware', function () {
   describe('Firebase Authorization', function() {
     before(async function() {
       this.firebaseApp = await firebase.initializeApp(firebaseConfig)
-      await this.firebaseApp.auth().signInWithEmailAndPassword('test@user.com', 'password')
+      await this.firebaseApp.auth().signInWithEmailAndPassword(FIREBASE_TEST_EMAIL,FIREBASE_TEST_PASSWORD)
       this.token = await this.firebaseApp.auth().currentUser.getIdToken(/* forceRefresh */ true)
     })
 

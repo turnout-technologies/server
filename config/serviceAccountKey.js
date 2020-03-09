@@ -11,9 +11,8 @@ let {
   FIREBASE_CLIENT
 } = process.env
 
-if (process.env.NODE_ENV === 'production') {
-  FIREBASE_PRIVATE_KEY = FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
-}
+// For production builds
+FIREBASE_PRIVATE_KEY = FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
 
 module.exports = {
   "type": FIREBASE_TYPE,
