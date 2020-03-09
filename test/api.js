@@ -39,7 +39,7 @@ describe('API Middleware', function () {
     before(async function() {
       this.firebaseApp = await firebase.initializeApp(firebaseConfig)
       await this.firebaseApp.auth().signInWithEmailAndPassword(FIREBASE_TEST_EMAIL,FIREBASE_TEST_PASSWORD)
-      this.token = await this.firebaseApp.auth().currentUser.getIdToken(/* forceRefresh */ true)
+      this.token = await this.firebaseApp.auth().currentUser.getIdToken()
     })
 
     it('should accept valid "Authorization" token', async function() {
