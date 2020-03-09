@@ -5,6 +5,6 @@ module.exports = {
   projectId: "turnout-dd144",
   storageBucket: "turnout-dd144.appspot.com",
   messagingSenderId: "941973159819",
-  appId: "1:941973159819:web:f49bf4bc3dcc95d362398e",
-  measurementId: "G-HJ8NZWJJE3"
-}
+  appId: "1:941973159819:web:3123dd4bae2335a462398e",
+  measurementId: "G-B8DFK7CSYP"
+};
