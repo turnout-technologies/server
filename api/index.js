@@ -40,7 +40,6 @@ router.use('/ballots', require('./ballots'))
 
 // Error handling endware
 router.use((err, req, res, next) => {
-  logger.error(err.message, err)
   switch (err.name) {
     case 'ValidationError': {
       err.status = 400
@@ -50,7 +49,10 @@ router.use((err, req, res, next) => {
       break
     }
   }
-  res.status(err.status || 500).send(err.message || 'Internal server error.')
+  if (!err.status) err.status = 500
+  if (!err.message) err.message = 'Internal server error.'
+  logger.error(err.message, err)
+  res.status(err.status).send(err.message)
 })
 
 module.exports = router

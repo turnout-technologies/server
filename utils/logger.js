@@ -5,10 +5,9 @@ switch(process.env.NODE_ENV) {
     logger = new Logger({
       level: 'none'
     })
-
-    module.exports = logger
     break
   default:
     logger = require('heroku-logger')
-    module.exports = logger
+
 }
+module.exports = logger
