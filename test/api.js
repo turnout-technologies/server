@@ -9,19 +9,32 @@ chai.use(chaitHttp)
 const expect = chai.expect
 const should = chai.should()
 
-describe('Firebase Connection', function () {
-  describe('Header Validation', function() {
+describe('API Middleware', function () {
+  describe('Authorization Header Error Validation', function() {
     it('should reject missing "Authorization" header', function(done) {
       chai.request(app).get('/v1')
       .then(function(res) {
-
+        expect(res).to.have.status(401)
+        expect(res.unauthorized).to.equal(true)
+        expect(res.text).to.eql('Invalid Authorization Header')
         done()
       })
       .catch(function(err) {
-        expect(err).should.have.status(401)
         done(err)
       })
+    })
 
+    it('should reject invalid "Authorization" header', function(done) {
+      chai.request(app).get('/v1').set('Authorization', `Bearer <something>`)
+      .then(function(res) {
+        expect(res).to.have.status(401)
+        expect(res.unauthorized).to.equal(true)
+        expect(res.text).to.eql('Invalid Authorization Token')
+        done()
+      })
+      .catch(function(err) {
+        done(err)
+      })
     })
   })
   // describe('it should accept valid POST /contact', function() {
