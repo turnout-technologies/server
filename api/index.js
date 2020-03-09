@@ -30,6 +30,10 @@ router.use(async (req, res, next) => {
   }
 })
 
+router.get('/', (req, res, next) => {
+  res.status(200).send('Turnout 2020')
+})
+
 router.use('/contact', require('./contact'))
 router.use('/users', require('./users'))
 router.use('/ballots', require('./ballots'))
