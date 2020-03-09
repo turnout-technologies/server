@@ -2,6 +2,7 @@ require('dotenv').config()
 const { Expo } = require('expo-server-sdk')
 const admin = require('firebase-admin')
 const moment = require('moment-timezone')
+const logger = require('../../utils/logger')
 
 let serviceAccount = require('../../config/serviceAccountKey')
 const est = 'America/New_York'
@@ -45,13 +46,13 @@ const retrieveTokens = async () => {
 
 const sendNotifications = async () => {
   try {
-    console.log('Beginning Push Notifications Job...')
+    logger.info('Beginning Push Notifications Job...')
     const isLive = await checkBallotToday()
-    if (!isLive) console.log('No live ballot today!')
+    if (!isLive) logger.warn('No live ballot today!')
     else {
-      console.log('Retrieving Expo Push Tokens...')
+      logger.info('Retrieving Expo Push Tokens...')
       const pushTokens = await retrieveTokens()
-      console.log(`Sending Push Notifications to ${pushTokens.length} users...`)
+      logger.info(`Sending Push Notifications to ${pushTokens.length} users...`)
       // Create the messages that you want to send to clents
       let messages = []
       for (let pushToken of pushTokens) {
@@ -59,7 +60,7 @@ const sendNotifications = async () => {
 
         // Check that all your push tokens appear to be valid Expo push tokens
         if (!Expo.isExpoPushToken(pushToken)) {
-          console.error(`Push token ${pushToken} is not a valid Expo push token`);
+          logger.error(`Push token ${pushToken} is not a valid Expo push token`);
           continue;
         }
 
@@ -86,14 +87,14 @@ const sendNotifications = async () => {
       // time, which nicely spreads the load out over time:
       for (let chunk of chunks) {
         let ticketChunk = await expo.sendPushNotificationsAsync(chunk);
-        console.log(ticketChunk);
+        logger.debug(ticketChunk);
         tickets.push(...ticketChunk);
       }
     }
 
     process.exit(0)
   } catch (err) {
-    console.error(err)
+    logger.error(err)
     process.exit(1)
   }
 }

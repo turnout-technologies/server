@@ -1,5 +1,6 @@
 const { Router } = require('express')
 const admin = require('../firebase')
+const logger = require('../utils/logger')
 
 const router = Router()
 
@@ -35,7 +36,7 @@ router.use('/ballots', require('./ballots'))
 
 // Error handling endware
 router.use((err, req, res, next) => {
-  console.error(err.message, err)
+  logger.error(err.message, err)
   switch (err.name) {
     case 'ValidationError': {
       err.status = 400
