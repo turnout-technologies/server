@@ -16,7 +16,7 @@ router.get('/leaderboard', async (req, res, next) => {
   try {
     // Request Query defaults to string
     const snapshot = await db.collection('users').orderBy('points', 'desc').limit(parseInt(req.query.limit) || 100).get()
-    if (snapshot.empty) res.status(200).json({ leaderboard: [] })
+    if (snapshot.empty) return res.status(200).json({ leaderboard: [] })
     const users = []
     // Grab the doc in data form
     snapshot.forEach(doc => {

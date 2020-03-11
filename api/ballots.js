@@ -131,7 +131,7 @@ router.get('/latest/results', async (req, res, next) => {
     const ballotId = meta.latestProcessedBallotId
     if (!ballotId) {
       console.error('No latest results to show')
-      res.status(200).end()
+      return res.status(200).end()
     }
 
     const response = await getBallotResults(ballotId, req.uid)
