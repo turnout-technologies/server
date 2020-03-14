@@ -1,4 +1,16 @@
-require('dotenv').config()
+if (process.env.NODE_ENV !== 'production') {
+  const dotenv = require('dotenv')
+  const path = require('path')
+
+  switch(process.env.NODE_ENV) {
+    case 'alpha':
+      dotenv.config({ path: path.resolve(__dirname, '../../.env.prod') })
+      break
+    default:
+      dotenv.config()
+  }
+}
+
 const { Expo } = require('expo-server-sdk')
 const admin = require('firebase-admin')
 const moment = require('moment-timezone')
@@ -69,12 +81,11 @@ const sendNotifications = async () => {
           to: pushToken,
           sound: 'default',
           priority: 'high',
-          body: 'Polls are open!',
+          body: 'Polls are open! Submit your ballot within the next 4 hours.',
           channelId: 'poll-notifications',
         })
       }
 
-      // TODO
       // The Expo push notification service accepts batches of notifications so
       // that you don't need to send 1000 requests to send 1000 notifications. We
       // recommend you batch your notifications to reduce the number of requests
@@ -90,8 +101,43 @@ const sendNotifications = async () => {
         logger.debug(ticketChunk);
         tickets.push(...ticketChunk);
       }
-    }
 
+      let receiptIds = [];
+      for (let ticket of tickets) {
+        // NOTE: Not all tickets have IDs; for example, tickets for notifications
+        // that could not be enqueued will have error information and no receipt ID.
+        if (ticket.id) {
+          receiptIds.push(ticket.id);
+        }
+      }
+
+      let receiptIdChunks = expo.chunkPushNotificationReceiptIds(receiptIds);
+      // Like sending notifications, there are different strategies you could use
+      // to retrieve batches of receipts from the Expo service.
+      for (let chunk of receiptIdChunks) {
+        let receipts = await expo.getPushNotificationReceiptsAsync(chunk);
+        console.log(receipts);
+
+        // The receipts specify whether Apple or Google successfully received the
+        // notification and information about an error, if one occurred.
+        for (const receiptId in receipts) {
+          const { status, message, details } = receipts[receiptId];
+          if (status === "ok") {
+            continue;
+          } else if (status === "error") {
+            console.error(
+              `There was an error sending a notification: ${message}`
+            );
+            if (details && details.error) {
+              // The error codes are listed in the Expo documentation:
+              // https://docs.expo.io/versions/latest/guides/push-notifications/#individual-errors
+              // You must handle the errors appropriately.
+              console.error(`The error code is ${details.error}`);
+            }
+          }
+        }
+      }
+    }
     process.exit(0)
   } catch (err) {
     logger.error(err)
