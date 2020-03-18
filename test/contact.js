@@ -39,29 +39,33 @@ describe('Contact API', function () {
       expect(res).to.have.status(201)
     })
 
-    it('Type: sad', async function() {
+    it('Type: sad w/ name', async function() {
       const res = await chai.request(app).post('/v1/contact').set('Authorization', `Bearer ${this.token}`).send({
         type: 'sad',
         message: 'This is bad!',
-        filename: ''
+        filename: '',
+        name: 'test'
       })
       expect(res).to.have.status(201)
     })
 
-    it('Type: bug', async function() {
+    it('Type: bug w/ name and email', async function() {
       const res = await chai.request(app).post('/v1/contact').set('Authorization', `Bearer ${this.token}`).send({
         type: 'bug',
         message: 'This is broken!',
-        filename: ''
+        filename: '',
+        name: 'Test User',
+        email: 'test@test.com'
       })
       expect(res).to.have.status(201)
     })
 
-    it('Type: suggestion w/ filename', async function() {
+    it('Type: suggestion w/ filename and email', async function() {
       const res = await chai.request(app).post('/v1/contact').set('Authorization', `Bearer ${this.token}`).send({
         type: 'suggestion',
         message: 'This should be this!',
-        filename: 'moohab.png'
+        filename: 'moohab.png',
+        email: 'test@test.com'
       })
       expect(res).to.have.status(201)
     })
@@ -77,7 +81,7 @@ describe('Contact API', function () {
   })
 
   describe('it should not accept invalid POST /contact', function() {
-    it('missing property filename', async function() {
+    it('missing property: filename', async function() {
       const res = await chai.request(app).post('/v1/contact').set('Authorization', `Bearer ${this.token}`).send({
         type: 'happy',
         message: 'This is great!'
@@ -97,6 +101,15 @@ describe('Contact API', function () {
         type: 'something',
         message: 'This is great!',
         filename: ''
+      })
+      expect(res).to.have.status(400)
+    })
+    it('superfluous field', async function() {
+      const res = await chai.request(app).post('/v1/contact').set('Authorization', `Bearer ${this.token}`).send({
+        type: 'question_idea',
+        message: 'This should be another question!',
+        filename: 'moohab1.jpg',
+        extra: 'something'
       })
       expect(res).to.have.status(400)
     })
