@@ -10,18 +10,22 @@ const contactSchema = Joi.object({
   type: Joi.string().valid('bug', 'happy', 'sad', 'suggestion', 'question_idea').required(),
   message: Joi.string().min(1).required(),
   filename: Joi.string().allow('').required(),
+  name: Joi.string(),
+  email: Joi.string()
 })
 
 router.post('/', async (req, res, next) => {
   try {
-    const { type, message, filename } = req.body
-    await contactSchema.validateAsync({ type, message, filename });
+    await contactSchema.validateAsync(req.body)
+    const { type, message, filename, name, email } = req.body
     const docId = uuid()
 
     await db.collection('contact').doc(docId).create({
       type,
       message,
       filename,
+      name: name ? name : '',
+      email: email ? email : '',
       uid: req.uid,
       createdAt: moment().unix(),
     })
