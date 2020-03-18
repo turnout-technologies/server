@@ -7,7 +7,8 @@
     "dev": "NODE_ENV=development nodemon server.js",
     "start": "node server.js",
     "test": "NODE_ENV=test mocha",
-    "polls-start": "node bin/push-notifications/polls-start"
+    "polls-start": "node bin/jobs/polls-start",
+    "results-processed": "node bin/jobs/results-processed"
   },
   "dependencies": {
     "@hapi/joi": "^17.1.0",
