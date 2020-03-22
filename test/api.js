@@ -29,7 +29,7 @@ describe('API Middleware', function () {
       expect(res).to.have.status(401)
       expect(res.unauthorized).to.equal(true)
       expect(res.text).to.eql('Invalid Authorization Header')
-    })
+    })g
 
     it('should reject invalid "Authorization" header', async function() {
       const res = await chai.request(app).get('/v1').set('Authorization', `Bearer <something>`)
