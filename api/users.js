@@ -12,40 +12,33 @@ const userSchema = Joi.object({
   avatarURL: Joi.string().uri().allow('').required(),
 })
 
+const cache = {}
 router.get('/leaderboard', async (req, res, next) => {
   try {
-    // Request Query defaults to string
-    const snapshot = await db.collection('users').orderBy('points', 'desc').limit(parseInt(req.query.limit) || 100).get()
-    if (snapshot.empty) return res.status(200).json({ leaderboard: [] })
-    const users = []
-    // Grab the doc in data form
-    snapshot.forEach(doc => {
-      let user = doc.data()
-      users.push({
-        id: user.id,
-        name: user.name,
-        avatarURL: user.avatarURL,
-        points: user.points,
-      })
-    })
-
-    if (users.find(user => user.id === req.uid)) res.status(200).json({
-      leaderboard: users
-    })
+    const today = moment().format('MM/DD')
+    let leaderboard = []
+    if (cache[today]) leaderboard = cache[today]
     else {
-      const doc = await db.collection('users').doc(req.uid).get()
-      const self = doc.data()
-
-      res.status(200).json({
-        leaderboard: users,
-        self: {
-          id: self.id,
-          name: self.name,
-          avatarURL: self.avatarURL,
-          points: self.points,
-        }
+      const snapshot = await db.collection('users').orderBy('points', 'desc').limit(100).get()
+      if (snapshot.empty) return res.status(200).json({ leaderboard })
+      // Grab the doc in data form
+      snapshot.forEach(doc => {
+        let user = doc.data()
+        leaderboard.push({
+          id: user.id,
+          name: user.name,
+          avatarURL: user.avatarURL,
+          points: user.points,
+        })
       })
+
+      // cache the leaderboard for today
+      cache[today] = leaderboard
     }
+
+    res.status(200).json({
+      leaderboard,
+    })
   } catch (err) {
     next(err)
   }

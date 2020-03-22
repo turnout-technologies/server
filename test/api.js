@@ -19,6 +19,10 @@ const firebaseConfig = require('../config/testConfig')
 
 
 describe('API Middleware', function () {
+  this.timeout(5000)
+  this.retries(1)
+  this.slow(1000)
+
   describe('Authorization Header Error Validation', function() {
     it('should reject missing "Authorization" header', async function() {
       const res = await chai.request(app).get('/v1')

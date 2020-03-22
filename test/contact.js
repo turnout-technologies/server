@@ -18,6 +18,10 @@ const firebase = require("firebase")
 const firebaseConfig = require('../config/testConfig')
 
 describe('Contact API', function () {
+  this.timeout(5000)
+  this.retries(1)
+  this.slow(1000)
+
   before(async function() {
     this.firebaseApp = await firebase.initializeApp(firebaseConfig)
     await this.firebaseApp.auth().signInWithEmailAndPassword(FIREBASE_TEST_EMAIL,FIREBASE_TEST_PASSWORD)
