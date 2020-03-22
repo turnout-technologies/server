@@ -72,16 +72,11 @@ router.post('/', async (req, res, next) => {
 
 })
 
-router.get('/:id', async (req, res, next) => {
+router.get('/self', async (req, res, next) => {
   try {
-    // If the requestor is not the same as the user to be edited
-    if (req.params.id !== req.uid) {
-      const error = new Error('Unauthorized User Request')
-      error.status = 401
-      throw error
-    }
-
     const doc = await db.collection('users').doc(req.uid).get()
+
+    if (!doc.exists) throw new Error(`User not found with id ${req.uid}`)
 
     res.status(200).json(doc.data())
   } catch (err) {
@@ -94,20 +89,15 @@ const tokenSchema = Joi.object({
   pushToken: Joi.string().allow('').required()
 })
 
-router.put('/:id/push-token', async (req, res, next) => {
+router.put('/self/push-token', async (req, res, next) => {
   try {
-    // If the requestor is not the same as the user to be edited
-    if (req.params.id !== req.uid) {
-      const error = new Error('Unauthorized User Request')
-      error.status = 401
-      throw error
-    }
-
+    await tokenSchema.validateAsync(req.body)
     const { pushToken } = req.body
-    await tokenSchema.validateAsync({ pushToken });
     // Check that all your push tokens appear to be valid Expo push tokens
     if (pushToken && !Expo.isExpoPushToken(pushToken)) {
-      throw new Error(`Push token ${pushToken} is not a valid Expo push token`)
+      const err = new Error(`Push token ${pushToken} is not a valid Expo push token`)
+      err.status = 400
+      throw err
     }
 
     const doc = await db.collection('users').doc(req.uid).update({
