@@ -39,7 +39,7 @@ router.get('/today', validateTimeAndCache, async (req, res, next) => {
       const targetDate = moment.tz(moment.tz(est).format("YYYY-MM-DD") + " 18:00", est)
       const snapshot = await db.collection('ballots').where('date', '==', targetDate.unix()).get()
       if (snapshot.empty) {
-        console.error('No ballot today!')
+        console.warn('No ballot today!')
         return res.status(200).end()
       } else {
         const docs = [];
