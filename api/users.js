@@ -1,12 +1,13 @@
 const { Router } = require('express')
 const { Expo } = require('expo-server-sdk')
-const Joi = require('@hapi/joi');
+const Joi = require('@hapi/joi')
 const moment = require('moment')
 const db = require('../db')
 
 const router = Router()
 const userSchema = Joi.object({
-  name: Joi.string().min(1).required(),
+  firstName: Joi.string().min(1).required(),
+  lastName: Joi.string().min(1).required(),
   email: Joi.string().email().required(),
   pushToken: Joi.string().allow('').required(),
   avatarURL: Joi.string().uri().allow('').required(),
@@ -26,7 +27,8 @@ router.get('/leaderboard', async (req, res, next) => {
         let user = doc.data()
         leaderboard.push({
           id: user.id,
-          name: user.name,
+          firstName: user.firstName,
+          lastName: user.lastName,
           avatarURL: user.avatarURL,
           points: user.points,
         })
@@ -46,16 +48,23 @@ router.get('/leaderboard', async (req, res, next) => {
 
 router.post('/', async (req, res, next) => {
   try {
-    const { name, email, pushToken, avatarURL } = req.body
-    await userSchema.validateAsync({ name, email, pushToken, avatarURL });
+
+    await userSchema.validateAsync(req.body)
+    const { firstName, lastName, email, pushToken, avatarURL } = req.body
     const newUser = {
       id: req.uid,
       createdAt: moment().unix(),
       points: 0,
-      name,
+      firstName,
+      lastName,
       email,
       pushToken: pushToken ? pushToken : '',
       avatarURL,
+      referral: {
+        code: shortid.generate(),
+        success: [],
+        pending: []
+      }
     }
     await db.collection('users').doc(newUser.id).set(newUser)
     res.status(201).json(newUser)

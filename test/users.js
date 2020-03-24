@@ -17,6 +17,59 @@ const should = chai.should()
 const firebase = require("firebase")
 const firebaseConfig = require('../config/testConfig')
 
+const { generateReferral } = require('../utils/referral')
+
+describe.only('Referral Code Generator', function () {
+  it('Richard Yang', function () {
+    const codes = {}
+    let collisions = 0
+    for(let i = 0; i < 10000; i++) {
+      let code = generateReferral({ firstName: 'Richard', lastName: 'Yang' })
+      if (codes[code]) {
+        collisions += 1
+      }
+      else codes[code] = true
+    }
+    console.log(collisions)
+  })
+  it('Andrew N', function () {
+    const codes = {}
+    let collisions = 0
+    for(let i = 0; i < 10000; i++) {
+      let code = generateReferral({ firstName: 'Andrew', lastName: 'N' })
+      if (codes[code]) {
+        collisions += 1
+      }
+      else codes[code] = true
+    }
+    console.log(collisions)
+  })
+  it('J Wagner', function () {
+    const codes = {}
+    let collisions = 0
+    for(let i = 0; i < 10000; i++) {
+      let code = generateReferral({ firstName: 'J', lastName: 'Wagner' })
+      if (codes[code]) {
+        collisions += 1
+      }
+      else codes[code] = true
+    }
+    console.log(collisions)
+  })
+  it('F U', function () {
+    const codes = {}
+    let collisions = 0
+    for(let i = 0; i < 10000; i++) {
+      let code = generateReferral({ firstName: 'F', lastName: 'U' })
+      if (codes[code]) {
+        collisions += 1
+      }
+      else codes[code] = true
+    }
+    console.log(collisions)
+  })
+})
+
 describe('Users API', function () {
   this.timeout(5000)
   this.retries(1)
@@ -38,7 +91,8 @@ describe('Users API', function () {
     describe('it should accept valid inputs', function() {
       it('w/ avatarURL & pushToken', async function() {
         const res = await chai.request(app).post('/v1/users').set('Authorization', `Bearer ${this.token}`).send({
-          name: 'george lopez',
+          firstName: 'George',
+          lastName: 'Lopez',
           email: 'test@test.com',
           avatarURL: 'https://www.google.com',
           pushToken: 'ExponentPushToken[g5sIEb0m2yFdzn5VdSSy9n]'
@@ -47,7 +101,8 @@ describe('Users API', function () {
       })
       it('w/ avatarURL === \'\' & pushToken === \'\'', async function() {
         const res = await chai.request(app).post('/v1/users').set('Authorization', `Bearer ${this.token}`).send({
-          name: 'george lopez',
+          firstName: 'George',
+          lastName: 'Lopez',
           email: 'test@test.com',
           avatarURL: '',
           pushToken: ''
@@ -58,7 +113,8 @@ describe('Users API', function () {
     describe('it should not accept invalid inputs', function() {
       it('missing fields: avatarURL', async function() {
         const res = await chai.request(app).post('/v1/users').set('Authorization', `Bearer ${this.token}`).send({
-          name: 'george lopez',
+          firstName: 'George',
+          lastName: 'Lopez',
           email: 'test@test.com',
           pushToken: ''
         })
@@ -66,7 +122,8 @@ describe('Users API', function () {
       })
       it('w/ invalid email', async function() {
         const res = await chai.request(app).post('/v1/users').set('Authorization', `Bearer ${this.token}`).send({
-          name: 'george lopez',
+          firstName: 'George',
+          lastName: 'Lopez',
           email: 'test@test',
           avatarURL: '',
           pushToken: ''
@@ -75,7 +132,8 @@ describe('Users API', function () {
       })
       it('w/ invalid avatarURL', async function() {
         const res = await chai.request(app).post('/v1/users').set('Authorization', `Bearer ${this.token}`).send({
-          name: 'george lopez',
+          firstName: 'George',
+          lastName: 'Lopez',
           email: 'test@test.com',
           avatarURL: 'hi',
           pushToken: ''
@@ -90,7 +148,7 @@ describe('Users API', function () {
       const res = await chai.request(app).get('/v1/users/self').set('Authorization', `Bearer ${this.token}`)
       expect(res).to.have.status(200)
       const user = res.body
-      expect(user).to.have.keys(['points', 'avatarURL', 'email', 'name', 'id', 'createdAt', 'pushToken'])
+      expect(user).to.have.keys(['points', 'avatarURL', 'email', 'firstName', 'lastName', 'id', 'createdAt', 'pushToken', 'referral'])
     })
   })
 
