@@ -39,7 +39,7 @@ router.get('/today', validateTimeAndCache, async (req, res, next) => {
       const targetDate = moment.tz(moment.tz(est).format("YYYY-MM-DD") + " 18:00", est)
       const snapshot = await db.collection('ballots').where('date', '==', targetDate.unix()).get()
       if (snapshot.empty) {
-        console.error('No ballot today!')
+        console.warn('No ballot today!')
         return res.status(200).end()
       } else {
         const docs = [];
@@ -93,13 +93,21 @@ router.post('/today/:ballot_id', validateTimeAndCache, async (req, res, next) =>
   }
 })
 
+const resultsCache = {}
+
 const getBallotResults = async (ballotId, requestorId) => {
-  const doc = await db.collection('ballots').doc(ballotId).get()
-  if(!doc.exists) throw new Error('Invalid ballot_id provided')
+  let ballot
 
-  const ballot = doc.data()
+  if (resultsCache[ballotId]) ballot = resultsCache[ballotId]
+  else {
+    const doc = await db.collection('ballots').doc(ballotId).get()
+    if(!doc.exists) throw new Error('Invalid ballot_id provided')
 
-  if (!ballot.processed) throw new Error('Ballot has not been processed yet')
+    ballot = doc.data()
+
+    if (!ballot.processed) throw new Error('Ballot has not been processed yet')
+    resultsCache[ballotId] = ballot
+  }
 
   const res = {
     date: ballot.date,

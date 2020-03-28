@@ -18,6 +18,10 @@ const firebase = require("firebase")
 const firebaseConfig = require('../config/testConfig')
 
 describe('Contact API', function () {
+  this.timeout(5000)
+  this.retries(1)
+  this.slow(1000)
+
   before(async function() {
     this.firebaseApp = await firebase.initializeApp(firebaseConfig)
     await this.firebaseApp.auth().signInWithEmailAndPassword(FIREBASE_TEST_EMAIL,FIREBASE_TEST_PASSWORD)
@@ -30,7 +34,7 @@ describe('Contact API', function () {
   })
 
   describe('it should accept valid POST /contact', function() {
-    it('Type: happy', async function() {
+    xit('Type: happy', async function() {
       const res = await chai.request(app).post('/v1/contact').set('Authorization', `Bearer ${this.token}`).send({
         type: 'happy',
         message: 'This is great!',
@@ -39,7 +43,7 @@ describe('Contact API', function () {
       expect(res).to.have.status(201)
     })
 
-    it('Type: sad w/ name', async function() {
+    xit('Type: sad w/ name', async function() {
       const res = await chai.request(app).post('/v1/contact').set('Authorization', `Bearer ${this.token}`).send({
         type: 'sad',
         message: 'This is bad!',
@@ -49,7 +53,7 @@ describe('Contact API', function () {
       expect(res).to.have.status(201)
     })
 
-    it('Type: bug w/ name and email', async function() {
+    xit('Type: bug w/ name and email', async function() {
       const res = await chai.request(app).post('/v1/contact').set('Authorization', `Bearer ${this.token}`).send({
         type: 'bug',
         message: 'This is broken!',
@@ -60,7 +64,7 @@ describe('Contact API', function () {
       expect(res).to.have.status(201)
     })
 
-    it('Type: suggestion w/ filename and email', async function() {
+    xit('Type: suggestion w/ filename and email', async function() {
       const res = await chai.request(app).post('/v1/contact').set('Authorization', `Bearer ${this.token}`).send({
         type: 'suggestion',
         message: 'This should be this!',
@@ -70,7 +74,7 @@ describe('Contact API', function () {
       expect(res).to.have.status(201)
     })
 
-    it('Type: question_idea w/ filename', async function() {
+    xit('Type: question_idea w/ filename', async function() {
       const res = await chai.request(app).post('/v1/contact').set('Authorization', `Bearer ${this.token}`).send({
         type: 'question_idea',
         message: 'This should be a question!',
@@ -81,14 +85,14 @@ describe('Contact API', function () {
   })
 
   describe('it should not accept invalid POST /contact', function() {
-    it('missing property: filename', async function() {
+    xit('missing property: filename', async function() {
       const res = await chai.request(app).post('/v1/contact').set('Authorization', `Bearer ${this.token}`).send({
         type: 'happy',
         message: 'This is great!'
       })
       expect(res).to.have.status(400)
     })
-    it('empty message', async function() {
+    xit('empty message', async function() {
       const res = await chai.request(app).post('/v1/contact').set('Authorization', `Bearer ${this.token}`).send({
         type: 'happy',
         message: '',
@@ -96,7 +100,7 @@ describe('Contact API', function () {
       })
       expect(res).to.have.status(400)
     })
-    it('wrong type enum', async function() {
+    xit('wrong type enum', async function() {
       const res = await chai.request(app).post('/v1/contact').set('Authorization', `Bearer ${this.token}`).send({
         type: 'something',
         message: 'This is great!',
@@ -104,7 +108,7 @@ describe('Contact API', function () {
       })
       expect(res).to.have.status(400)
     })
-    it('superfluous field', async function() {
+    xit('superfluous field', async function() {
       const res = await chai.request(app).post('/v1/contact').set('Authorization', `Bearer ${this.token}`).send({
         type: 'question_idea',
         message: 'This should be another question!',

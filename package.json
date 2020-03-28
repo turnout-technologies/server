@@ -8,7 +8,8 @@
     "start": "node server.js",
     "test": "NODE_ENV=test mocha",
     "polls-start": "node bin/jobs/polls-start",
-    "results-processed": "node bin/jobs/results-processed"
+    "results-processed": "node bin/jobs/results-processed",
+    "manual": "node bin/jobs/manual"
   },
   "dependencies": {
     "@hapi/joi": "^17.1.0",
@@ -24,6 +25,7 @@
     "mongoose": "^5.8.9",
     "morgan": "^1.9.1",
     "path": "^0.12.7",
+    "readline-sync": "^1.4.10",
     "uuid": "^3.4.0"
   },
   "devDependencies": {
