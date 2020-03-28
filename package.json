@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "NODE_ENV=development nodemon server.js",
     "start": "node server.js",
-    "test": "NODE_ENV=test mocha test/users.js",
+    "test": "NODE_ENV=test mocha",
     "polls-start": "node bin/jobs/polls-start",
     "results-processed": "node bin/jobs/results-processed",
     "manual": "node bin/jobs/manual"

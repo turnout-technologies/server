@@ -59,12 +59,7 @@ router.post('/', async (req, res, next) => {
       lastName,
       email,
       pushToken: pushToken ? pushToken : '',
-      avatarURL,
-      referral: {
-        code: shortid.generate(),
-        success: [],
-        pending: []
-      }
+      avatarURL
     }
     await db.collection('users').doc(newUser.id).set(newUser)
     res.status(201).json(newUser)

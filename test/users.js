@@ -17,58 +17,58 @@ const should = chai.should()
 const firebase = require("firebase")
 const firebaseConfig = require('../config/testConfig')
 
-const { generateReferral } = require('../utils/referral')
+// const { generateReferral } = require('../utils/referral')
 
-describe.only('Referral Code Generator', function () {
-  it('Richard Yang', function () {
-    const codes = {}
-    let collisions = 0
-    for(let i = 0; i < 10000; i++) {
-      let code = generateReferral({ firstName: 'Richard', lastName: 'Yang' })
-      if (codes[code]) {
-        collisions += 1
-      }
-      else codes[code] = true
-    }
-    console.log(collisions)
-  })
-  it('Andrew N', function () {
-    const codes = {}
-    let collisions = 0
-    for(let i = 0; i < 10000; i++) {
-      let code = generateReferral({ firstName: 'Andrew', lastName: 'N' })
-      if (codes[code]) {
-        collisions += 1
-      }
-      else codes[code] = true
-    }
-    console.log(collisions)
-  })
-  it('J Wagner', function () {
-    const codes = {}
-    let collisions = 0
-    for(let i = 0; i < 10000; i++) {
-      let code = generateReferral({ firstName: 'J', lastName: 'Wagner' })
-      if (codes[code]) {
-        collisions += 1
-      }
-      else codes[code] = true
-    }
-    console.log(collisions)
-  })
-  it('F U', function () {
-    const codes = {}
-    let collisions = 0
-    for(let i = 0; i < 10000; i++) {
-      let code = generateReferral({ firstName: 'F', lastName: 'U' })
-      if (codes[code]) {
-        collisions += 1
-      }
-      else codes[code] = true
-    }
-    console.log(collisions)
-  })
-})
+// describe.only('Referral Code Generator', function () {
+//   it('Richard Yang', function () {
+//     const codes = {}
+//     let collisions = 0
+//     for(let i = 0; i < 10000; i++) {
+//       let code = generateReferral({ firstName: 'Richard', lastName: 'Yang' })
+//       if (codes[code]) {
+//         collisions += 1
+//       }
+//       else codes[code] = true
+//     }
+//     console.log(collisions)
+//   })
+//   it('Andrew N', function () {
+//     const codes = {}
+//     let collisions = 0
+//     for(let i = 0; i < 10000; i++) {
+//       let code = generateReferral({ firstName: 'Andrew', lastName: 'N' })
+//       if (codes[code]) {
+//         collisions += 1
+//       }
+//       else codes[code] = true
+//     }
+//     console.log(collisions)
+//   })
+//   it('J Wagner', function () {
+//     const codes = {}
+//     let collisions = 0
+//     for(let i = 0; i < 10000; i++) {
+//       let code = generateReferral({ firstName: 'J', lastName: 'Wagner' })
+//       if (codes[code]) {
+//         collisions += 1
+//       }
+//       else codes[code] = true
+//     }
+//     console.log(collisions)
+//   })
+//   it('F U', function () {
+//     const codes = {}
+//     let collisions = 0
+//     for(let i = 0; i < 10000; i++) {
+//       let code = generateReferral({ firstName: 'F', lastName: 'U' })
+//       if (codes[code]) {
+//         collisions += 1
+//       }
+//       else codes[code] = true
+//     }
+//     console.log(collisions)
+//   })
+// })
 
 describe('Users API', function () {
   this.timeout(5000)
@@ -148,7 +148,7 @@ describe('Users API', function () {
       const res = await chai.request(app).get('/v1/users/self').set('Authorization', `Bearer ${this.token}`)
       expect(res).to.have.status(200)
       const user = res.body
-      expect(user).to.have.keys(['points', 'avatarURL', 'email', 'firstName', 'lastName', 'id', 'createdAt', 'pushToken', 'referral'])
+      expect(user).to.have.keys(['points', 'avatarURL', 'email', 'firstName', 'lastName', 'id', 'createdAt', 'pushToken'])
     })
   })
 
