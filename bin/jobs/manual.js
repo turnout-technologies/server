@@ -1,15 +1,17 @@
 
 const { sendNotifications } = require('./common')
 const logger = require('../../utils/logger')
+const readlineSync = require('readline-sync')
 
 const startJob = async () => {
   try {
+    const body = readlineSync.question('Push notification message: ')
     logger.info('Starting manual push-notifications job...')
     await sendNotifications({
       sound: 'default',
       priority: 'high',
-      body: 'Our first phase of alpha has ended. Thanks so much for your participation! You may need to open, close, then re-open the app to view our message.',
-      channelId: 'poll-notifications',
+      body,
+      channelId: 'manual',
     })
     logger.info('Job complete.')
     process.exit(0)
