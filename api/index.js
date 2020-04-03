@@ -34,9 +34,10 @@ router.get('/', (req, res, next) => {
   res.status(200).send('Turnout 2020')
 })
 
-router.use('/contact', require('./contact'))
+// router.use('/contact', require('./contact'))
 router.use('/users', require('./users'))
 router.use('/ballots', require('./ballots'))
+router.use('/drops', require('./drops'))
 
 // Error handling endware
 router.use((err, req, res, next) => {
