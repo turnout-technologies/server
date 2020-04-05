@@ -16,11 +16,13 @@ const userSchema = Joi.object({
 const cache = {}
 router.get('/leaderboard', async (req, res, next) => {
   try {
+    // default to total if a query is not provided
+    let { sort = 'total' } = req.query
     const today = moment().format('MM/DD')
     let leaderboard = []
-    if (cache[today]) leaderboard = cache[today]
+    if (cache[sort] && cache[sort][today]) leaderboard = cache[sort][today]
     else {
-      const snapshot = await db.collection('users').orderBy('points', 'desc').limit(100).get()
+      const snapshot = await db.collection('users').orderBy(`points.${sort}`, 'desc').limit(100).get()
       if (snapshot.empty) return res.status(200).json({ leaderboard })
       // Grab the doc in data form
       snapshot.forEach(doc => {
@@ -35,7 +37,8 @@ router.get('/leaderboard', async (req, res, next) => {
       })
 
       // cache the leaderboard for today
-      cache[today] = leaderboard
+      if (!cache[sort]) cache[sort] = {}
+      cache[sort][today] = leaderboard
     }
 
     res.status(200).json({
