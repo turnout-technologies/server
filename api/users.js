@@ -56,7 +56,9 @@ router.post('/', async (req, res, next) => {
     const newUser = {
       id: req.uid,
       createdAt: moment().unix(),
-      points: 0,
+      points: {
+        total: 0
+      },
       firstName,
       lastName,
       email,
