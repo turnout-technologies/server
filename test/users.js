@@ -159,9 +159,22 @@ describe('Users API', function () {
       const { leaderboard } = res.body
       expect(leaderboard).to.be.an('array')
     })
+    it('it should return valid response w/ sort query', async function() {
+      const res = await chai.request(app).get('/v1/users/leaderboard').query({ sort: 'live' }).set('Authorization', `Bearer ${this.token}`)
+      expect(res).to.have.status(200)
+      const { leaderboard } = res.body
+      expect(leaderboard).to.be.an('array')
+    })
     it('it should return valid response with caching', async function() {
       this.timeout(100)
-      const res = await chai.request(app).get('/v1/users/leaderboard').set('Authorization', `Bearer ${this.token}`).query({ limit: 1 })
+      const res = await chai.request(app).get('/v1/users/leaderboard').set('Authorization', `Bearer ${this.token}`)
+      expect(res).to.have.status(200)
+      const { leaderboard } = res.body
+      expect(leaderboard).to.be.an('array')
+    })
+    it('it should return valid response with caching w/ sort query', async function() {
+      this.timeout(100)
+      const res = await chai.request(app).get('/v1/users/leaderboard').query({ sort: 'live' }).set('Authorization', `Bearer ${this.token}`)
       expect(res).to.have.status(200)
       const { leaderboard } = res.body
       expect(leaderboard).to.be.an('array')

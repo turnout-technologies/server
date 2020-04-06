@@ -35,7 +35,6 @@ router.get('/leaderboard', async (req, res, next) => {
           points: user.points,
         })
       })
-
       // cache the leaderboard for today
       if (!cache[sort]) cache[sort] = {}
       cache[sort][today] = leaderboard
