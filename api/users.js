@@ -2,6 +2,7 @@ const { Router } = require('express')
 const { Expo } = require('expo-server-sdk')
 const Joi = require('@hapi/joi')
 const moment = require('moment')
+const increment = require('firebase-admin').firestore.FieldValue.increment
 const db = require('../db')
 
 const router = Router()
@@ -9,8 +10,9 @@ const userSchema = Joi.object({
   firstName: Joi.string().min(1).required(),
   lastName: Joi.string().min(1).required(),
   email: Joi.string().email().required(),
-  pushToken: Joi.string().allow('').required(),
+  pushToken: Joi.string().allow(''),
   avatarURL: Joi.string().uri().allow('').required(),
+  referringUserId: Joi.string(),
 })
 
 const cache = {}
@@ -48,11 +50,32 @@ router.get('/leaderboard', async (req, res, next) => {
   }
 })
 
+const referralBonus = {
+  'referrals.valid': increment(1),
+  'powerups.hacks': increment(1)
+}
+
+async function addReferral(referringUserId) {
+  const userRef = db.collection('users').doc(referringUserId)
+  const userDoc = await userRef.get()
+  if (!userDoc.exists) throw new Error('Referring User ID Not Found.')
+
+  // Add one to referrals and power ups
+  try {
+    await userRef.update(referralBonus)
+    return true
+  } catch (err) {
+    return false
+  }
+}
+
 router.post('/', async (req, res, next) => {
   try {
-
     await userSchema.validateAsync(req.body)
-    const { firstName, lastName, email, pushToken, avatarURL } = req.body
+    const { firstName, lastName, email, pushToken, avatarURL, referringUserId } = req.body
+
+    let bonus = await addReferral(referringUserId) ? 1 : 0
+
     const newUser = {
       id: req.uid,
       createdAt: moment().unix(),
@@ -63,7 +86,13 @@ router.post('/', async (req, res, next) => {
       lastName,
       email,
       pushToken: pushToken ? pushToken : '',
-      avatarURL
+      avatarURL,
+      referrals: {
+        valid: bonus
+      },
+      powerups: {
+        hacks: bonus
+      }
     }
     await db.collection('users').doc(newUser.id).set(newUser)
     res.status(201).json(newUser)
