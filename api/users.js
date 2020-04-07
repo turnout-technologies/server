@@ -12,7 +12,7 @@ const userSchema = Joi.object({
   email: Joi.string().email().required(),
   pushToken: Joi.string().allow(''),
   avatarURL: Joi.string().uri().allow('').required(),
-  referringUserId: Joi.string(),
+  referringUserId: Joi.string().allow(''),
 })
 
 const cache = {}
@@ -74,7 +74,7 @@ router.post('/', async (req, res, next) => {
     await userSchema.validateAsync(req.body)
     const { firstName, lastName, email, pushToken, avatarURL, referringUserId } = req.body
 
-    let bonus = await addReferral(referringUserId) ? 1 : 0
+    let bonus = !!referringUserId && await addReferral(referringUserId) ? 1 : 0
 
     const newUser = {
       id: req.uid,
