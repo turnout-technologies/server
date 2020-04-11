@@ -50,15 +50,18 @@ router.get('/leaderboard', async (req, res, next) => {
   }
 })
 
-const referralBonus = {
-  'referrals.valid': increment(1),
-  'powerups.hacks': increment(1)
-}
-
 async function addReferral(referringUserId) {
   const userRef = db.collection('users').doc(referringUserId)
   const userDoc = await userRef.get()
   if (!userDoc.exists) throw new Error('Referring User ID Not Found.')
+  const user = userDoc.data()
+
+  const referralBonus = {
+    'referrals.valid': increment(1),
+  }
+
+  // If number is going to hit a certain level 1,3,5,10
+  if ([0,2,4,9].includes(user.referrals.valid)) referralBonus['powerups.hacks'] = increment(1)
 
   // Add one to referrals and power ups
   try {
