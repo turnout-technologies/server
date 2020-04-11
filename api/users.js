@@ -92,7 +92,8 @@ router.post('/', async (req, res, next) => {
       },
       powerups: {
         hacks: bonus
-      }
+      },
+      turbovote: ''
     }
     await db.collection('users').doc(newUser.id).set(newUser)
     res.status(201).json(newUser)
@@ -139,5 +140,19 @@ router.put('/self/push-token', async (req, res, next) => {
     next(err)
   }
 })
+
+router.put('/self/turbovote', async (req, res, next) => {
+  try {
+    // Check that all your push tokens appear to be valid Expo push tokens
+    await db.collection('users').doc(req.uid).update({
+      turbovote: moment().unix()
+    })
+
+    res.status(200).end()
+  } catch (err) {
+    next(err)
+  }
+})
+
 
 module.exports = router

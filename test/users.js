@@ -148,7 +148,7 @@ describe('Users API', function () {
       const res = await chai.request(app).get('/v1/users/self').set('Authorization', `Bearer ${this.token}`)
       expect(res).to.have.status(200)
       const user = res.body
-      expect(user).to.have.keys(['points', 'avatarURL', 'email', 'firstName', 'lastName', 'id', 'createdAt', 'pushToken'])
+      expect(user).to.have.keys(['points', 'avatarURL', 'email', 'firstName', 'lastName', 'id', 'createdAt', 'pushToken', 'turbovote'])
     })
   })
 
@@ -181,7 +181,7 @@ describe('Users API', function () {
     })
   })
 
-  describe('PUT /users/push-token', function() {
+  describe('PUT /users/self/push-token', function() {
     describe('it should accept valid inputs', function() {
       it('enable push-token', async function() {
         const res = await chai.request(app).put('/v1/users/self/push-token').set('Authorization', `Bearer ${this.token}`).send({
@@ -219,4 +219,10 @@ describe('Users API', function () {
     })
   })
 
+  describe('PUT /users/self/turbovote', function() {
+    it('should add timestamp to turbovote', async function() {
+      const res = await chai.request(app).put('/v1/users/self/turbovote').set('Authorization', `Bearer ${this.token}`).send()
+      expect(res).to.have.status(200)
+    })
+  })
 })
