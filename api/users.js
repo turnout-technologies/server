@@ -52,20 +52,24 @@ router.get('/leaderboard', async (req, res, next) => {
 
 async function addReferral(referringUserId) {
   const userRef = db.collection('users').doc(referringUserId)
-  const userDoc = await userRef.get()
-  if (!userDoc.exists) throw new Error('Referring User ID Not Found.')
-  const user = userDoc.data()
-
-  const referralBonus = {
-    'referrals.valid': increment(1),
-  }
-
-  // If number is going to hit a certain level 1,3,5,10
-  if ([0,2,4,9].includes(user.referrals.valid)) referralBonus['powerups.hacks'] = increment(1)
-
-  // Add one to referrals and power ups
+  // Run a transaction to guarantee acidity - read must come before write
   try {
-    await userRef.update(referralBonus)
+    await db.runTransaction(async (t) => {
+      const userDoc = await t.get(userRef)
+
+      if (!userDoc.exists) throw new Error('Referring User ID Not Found.')
+      const user = userDoc.data()
+
+      const referralBonus = {
+        'referrals.valid': user.referrals.valid + 1,
+      }
+
+      // If number is going to hit a certain level 1,3,5,10
+      if ([0,2,4,9].includes(user.referrals.valid)) referralBonus['powerups.hacks'] = user.powerups.hacks + 1
+
+      t.update(userRef, referralBonus)
+    })
+
     return true
   } catch (err) {
     return false
@@ -74,13 +78,13 @@ async function addReferral(referringUserId) {
 
 router.post('/', async (req, res, next) => {
   try {
-    await userSchema.validateAsync(req.body)
+    // await userSchema.validateAsync(req.body)
     const { firstName, lastName, email, pushToken, avatarURL, referringUserId } = req.body
 
     let bonus = !!referringUserId && await addReferral(referringUserId) ? 1 : 0
 
     const newUser = {
-      id: req.uid,
+      id: ''+ req.body.id,
       createdAt: moment().unix(),
       points: {
         total: 0
@@ -91,7 +95,8 @@ router.post('/', async (req, res, next) => {
       pushToken: pushToken ? pushToken : '',
       avatarURL,
       referrals: {
-        valid: bonus
+        valid: 0,
+        referringUserId
       },
       powerups: {
         hacks: bonus
