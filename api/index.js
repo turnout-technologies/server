@@ -7,22 +7,22 @@ const router = Router()
 // Validate request token. If validation fails, gets passed onto error handling endware
 router.use(async (req, res, next) => {
   try {
-    // const authHeader = req.header('Authorization')
-    // if (!authHeader) {
-    //   const err = new Error('Invalid Authorization Header')
-    //   err.status = 401
-    //   throw err
-    // }
+    const authHeader = req.header('Authorization')
+    if (!authHeader) {
+      const err = new Error('Invalid Authorization Header')
+      err.status = 401
+      throw err
+    }
 
-    // const token = authHeader.replace('Bearer', '').trim()
-    // req.decodedToken = await admin.auth().verifyIdToken(token)
-    // .catch(() => {
-    //   const err = new Error('Invalid Authorization Token')
-    //   err.status = 401
-    //   throw err
-    // })
-    // req.uid = req.decodedToken.uid
-    // req.token = token
+    const token = authHeader.replace('Bearer', '').trim()
+    req.decodedToken = await admin.auth().verifyIdToken(token)
+    .catch(() => {
+      const err = new Error('Invalid Authorization Token')
+      err.status = 401
+      throw err
+    })
+    req.uid = req.decodedToken.uid
+    req.token = token
     next()
   } catch (err) {
 

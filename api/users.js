@@ -78,13 +78,13 @@ async function addReferral(referringUserId) {
 
 router.post('/', async (req, res, next) => {
   try {
-    // await userSchema.validateAsync(req.body)
+    await userSchema.validateAsync(req.body)
     const { firstName, lastName, email, pushToken, avatarURL, referringUserId } = req.body
 
     let bonus = !!referringUserId && await addReferral(referringUserId) ? 1 : 0
 
     const newUser = {
-      id: ''+ req.body.id,
+      id: req.uid,
       createdAt: moment().unix(),
       points: {
         total: 0
