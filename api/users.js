@@ -2,8 +2,9 @@ const { Router } = require('express')
 const { Expo } = require('expo-server-sdk')
 const Joi = require('@hapi/joi')
 const moment = require('moment')
-const increment = require('firebase-admin').firestore.FieldValue.increment
 const db = require('../db')
+
+const referralLevels = [1,5,10,20]
 
 const router = Router()
 const userSchema = Joi.object({
@@ -64,8 +65,8 @@ async function addReferral(referringUserId) {
         'referrals.valid': user.referrals.valid + 1,
       }
 
-      // If number is going to hit a certain level 1,3,5,10
-      if ([0,2,4,9].includes(user.referrals.valid)) referralBonus['powerups.hacks'] = user.powerups.hacks + 1
+      // If number is going to hit a certain level 1,5,10,20 (1 behind)
+      if (referralLevels.map(level => level - 1).includes(user.referrals.valid)) referralBonus['powerups.hacks'] = user.powerups.hacks + 1
 
       t.update(userRef, referralBonus)
     })
@@ -117,7 +118,18 @@ router.get('/self', async (req, res, next) => {
 
     if (!doc.exists) throw new Error(`User not found with id ${req.uid}`)
 
-    res.status(200).json(doc.data())
+    const user = doc.data()
+
+    // Determine how many left until next referral level is hit
+    const { valid } = user.referrals
+    for(level of referralLevels) {
+      if (valid < level) {
+        user.referrals.nextLevel = level
+        break
+      }
+    }
+
+    res.status(200).json(user)
   } catch (err) {
     next(err)
   }
