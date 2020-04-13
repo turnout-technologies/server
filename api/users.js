@@ -5,6 +5,7 @@ const moment = require('moment')
 const db = require('../db')
 
 const referralLevels = [1,5,10,20]
+const referralUpcomingLevels = referralLevels.map(e => e - 1)
 
 const router = Router()
 const userSchema = Joi.object({
@@ -66,7 +67,7 @@ async function addReferral(referringUserId) {
       }
 
       // If number is going to hit a certain level 1,5,10,20 (1 behind)
-      if (referralLevels.map(level => level - 1).includes(user.referrals.valid)) referralBonus['powerups.hacks'] = user.powerups.hacks + 1
+      if (referralUpcomingLevels.includes(user.referrals.valid)) referralBonus['powerups.hacks'] = user.powerups.hacks + 1
 
       t.update(userRef, referralBonus)
     })
