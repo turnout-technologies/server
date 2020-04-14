@@ -1,6 +1,7 @@
 const { Router } = require('express')
 const moment = require('moment-timezone')
 const Joi = require('@hapi/joi');
+const increment = require('firebase-admin').firestore.FieldValue.increment
 const db = require('../db')
 
 const router = Router()
@@ -119,6 +120,7 @@ const getBallotResults = async (ballotId, requestorId) => {
     response: null,
   }
 
+  // Add user response information
   const responseDoc = await db.collection('ballots').doc(ballotId).collection('responses').doc(requestorId).get()
 
   if (responseDoc.exists) {
@@ -142,9 +144,9 @@ router.get('/latest/results', async (req, res, next) => {
       return res.status(200).end()
     }
 
-    const response = await getBallotResults(ballotId, req.uid)
+    const ballotResults = await getBallotResults(ballotId, req.uid)
 
-    res.status(200).json(response)
+    res.status(200).json(ballotResults)
   } catch (err) {
     next(err)
   }
@@ -153,9 +155,54 @@ router.get('/latest/results', async (req, res, next) => {
 router.get('/:ballot_id/results', async (req, res, next) => {
   try {
     const ballotId = req.params.ballot_id
-    const response = await getBallotResults(ballotId, req.uid)
+    const ballotResults = await getBallotResults(ballotId, req.uid)
 
-    res.status(200).json(response)
+    res.status(200).json(ballotResults)
+  } catch (err) {
+    next(err)
+  }
+})
+
+// Autocorrect
+router.put('/latest/results/self', async (req, res, next) => {
+  try {
+    const doc = await db.collection('meta').doc('ballot').get()
+    if (!doc.exists) throw new Error('Ballot meta is not defined')
+
+    const meta = doc.data()
+
+    const ballotId = meta.latestProcessedBallotId
+
+    const ballotResults = await getBallotResults(ballotId, req.uid)
+    const { userPoints, response } = ballotResults
+
+    // Add autocorrect field if response exists
+    if (!response || !userPoints) throw new Error('User does not have a response for this ballot')
+
+    const { questionId, pointsToAdd, dropId } = req.body
+
+    // Update response object to mark question as autocorrected and increment bonus points from that response
+    const ballotResponseRef = await db.collection('ballots').doc(ballotId).collection('responses').doc(req.uid)
+    const ballotResponseUpdate = {
+      'autocorrect.bonus': increment(pointsToAdd),
+    }
+
+    ballotResponseUpdate[`autocorrect.questionIds.${questionId}`] = true
+
+    await ballotResponseRef.update(ballotResponseUpdate)
+    // Replace updated ballot response object on ballotResults
+    const ballotResponseDoc = await ballotResponseRef.get()
+    ballotResults.response = ballotResponseDoc.data()
+
+    // Update user points and remove a hack
+    const userUpdate = {
+      'powerups.autocorrects': increment(-1),
+      'points.total': increment(pointsToAdd)
+    }
+    userUpdate[`points.${dropId}`] = increment(pointsToAdd)
+    await db.collection('users').doc(req.uid).update(userUpdate)
+
+    res.status(200).json(ballotResults)
   } catch (err) {
     next(err)
   }

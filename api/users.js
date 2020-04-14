@@ -67,7 +67,7 @@ async function addReferral(referringUserId) {
       }
 
       // If number is going to hit a certain level 1,5,10,20 (1 behind)
-      if (referralUpcomingLevels.includes(user.referrals.valid)) referralBonus['powerups.hacks'] = user.powerups.hacks + 1
+      if (referralUpcomingLevels.includes(user.referrals.valid)) referralBonus['powerups.autocorrects'] = user.powerups.autocorrects + 1
 
       t.update(userRef, referralBonus)
     })
@@ -101,7 +101,7 @@ router.post('/', async (req, res, next) => {
         referringUserId
       },
       powerups: {
-        hacks: bonus
+        autocorrects: bonus
       },
       turbovote: ''
     }
