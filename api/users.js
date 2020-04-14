@@ -17,14 +17,17 @@ const userSchema = Joi.object({
   referringUserId: Joi.string().allow(''),
 })
 
-const cache = {}
+let cache = {}
+// Clear cache every 30 minutes
+setInterval(() => {
+  cache = {}
+}, 1800000)
 router.get('/leaderboard', async (req, res, next) => {
   try {
     // default to total if a query is not provided
     let { sort = 'total' } = req.query
-    const today = moment().format('MM/DD')
     let leaderboard = []
-    if (cache[sort] && cache[sort][today]) leaderboard = cache[sort][today]
+    if (cache[sort]) leaderboard = cache[sort]
     else {
       const snapshot = await db.collection('users').orderBy(`points.${sort}`, 'desc').limit(100).get()
       if (snapshot.empty) return res.status(200).json({ leaderboard })
@@ -40,8 +43,7 @@ router.get('/leaderboard', async (req, res, next) => {
         })
       })
       // cache the leaderboard for today
-      if (!cache[sort]) cache[sort] = {}
-      cache[sort][today] = leaderboard
+      cache[sort] = leaderboard
     }
 
     res.status(200).json({
