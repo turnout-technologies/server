@@ -187,7 +187,9 @@ router.put('/latest/results/self', async (req, res, next) => {
       'autocorrect.bonus': increment(pointsToAdd),
     }
 
-    ballotResponseUpdate[`autocorrect.questionIds.${questionId}`] = true
+    // If the questionIds is not an array yet, create one
+    if (!response.autocorrect && !response.autocorrect.questionIds) ballotResponseUpdate['autocorrect.questionIds'] = [questionId]
+    else ballotResponseUpdate['autocorrect.questionIds'] = [...response.autocorrect.questionIds, questionId]
 
     await ballotResponseRef.update(ballotResponseUpdate)
     // Replace updated ballot response object on ballotResults
@@ -199,6 +201,7 @@ router.put('/latest/results/self', async (req, res, next) => {
       'powerups.autocorrects': increment(-1),
       'points.total': increment(pointsToAdd)
     }
+
     userUpdate[`points.${dropId}`] = increment(pointsToAdd)
     await db.collection('users').doc(req.uid).update(userUpdate)
 
