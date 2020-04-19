@@ -116,6 +116,7 @@ const getBallotResults = async (ballotId, requestorId) => {
     questions: ballot.questions,
     aggregate: ballot.results.aggregate,
     winningAnswers: ballot.results.winningAnswers,
+    dropId: ballot.dropId,
     userPoints: null,
     response: null,
   }
