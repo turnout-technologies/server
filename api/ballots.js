@@ -188,7 +188,7 @@ router.put('/latest/results/self', async (req, res, next) => {
     }
 
     // If the questionIds is not an array yet, create one
-    if (!response.autocorrect && !response.autocorrect.questionIds) ballotResponseUpdate['autocorrect.questionIds'] = [questionId]
+    if (!response.autocorrect || !response.autocorrect.questionIds) ballotResponseUpdate['autocorrect.questionIds'] = [questionId]
     else ballotResponseUpdate['autocorrect.questionIds'] = [...response.autocorrect.questionIds, questionId]
 
     await ballotResponseRef.update(ballotResponseUpdate)
