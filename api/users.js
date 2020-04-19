@@ -17,18 +17,18 @@ const userSchema = Joi.object({
   referringUserId: Joi.string().allow(''),
 })
 
-let cache = {}
-// Clear cache every 30 minutes
-setInterval(() => {
-  cache = {}
-}, 1800000)
+// let cache = {}
+// // Clear cache every 30 minutes
+// setInterval(() => {
+//   cache = {}
+// }, 1800000)
 router.get('/leaderboard', async (req, res, next) => {
   try {
     // default to total if a query is not provided
     let { sort = 'total' } = req.query
     let leaderboard = []
-    if (cache[sort]) leaderboard = cache[sort]
-    else {
+    // if (cache[sort]) leaderboard = cache[sort]
+    // else {
       const snapshot = await db.collection('users').orderBy(`points.${sort}`, 'desc').limit(100).get()
       if (snapshot.empty) return res.status(200).json({ leaderboard })
       // Grab the doc in data form
@@ -42,20 +42,20 @@ router.get('/leaderboard', async (req, res, next) => {
           points: user.points,
         })
       })
-      // cache the leaderboard for today
-      cache[sort] = leaderboard
-    }
+    //   // cache the leaderboard for today
+    //   cache[sort] = leaderboard
+    // }
 
     // Get the dropId
-    let dropId
-    if (cache.dropId) dropId = cache.dropId
-    else {
+    // let dropId
+    // if (cache.dropId) dropId = cache.dropId
+    // else {
       const doc = await db.collection('drops').doc('live').get()
 
       const drop = doc.data()
       dropId = drop.id
-      cache.dropId = dropId
-    }
+    //   cache.dropId = dropId
+    // }
 
     res.status(200).json({
       dropId,
