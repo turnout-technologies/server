@@ -11,6 +11,9 @@ const startJob = async () => {
         priority: 'high',
         body: 'Polls are open! Submit your ballot within the next 4 hours.',
         channelId: 'poll-notifications',
+        data: {
+          type: 'poll-notification'
+        }
       })
     }
     logger.info('Polls start job complete.')

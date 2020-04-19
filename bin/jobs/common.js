@@ -60,7 +60,7 @@ const retrieveTokens = async () => {
   return tokens
 }
 
-module.exports.sendNotifications = async ({ sound, priority, body, channelId }) => {
+module.exports.sendNotifications = async ({ sound, priority, body, channelId, data }) => {
   try {
     logger.info('Beginning Push Notifications Job with:', { sound, priority, body, channelId })
 
@@ -84,6 +84,7 @@ module.exports.sendNotifications = async ({ sound, priority, body, channelId }) 
         priority,
         body,
         channelId,
+        data
       })
     }
 
