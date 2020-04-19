@@ -8,7 +8,7 @@ const startJob = async () => {
       sound: 'default',
       priority: 'high',
       body: 'The results are in! Let\'s see what the winning answers are.',
-      channelId: 'poll-notifications',
+      channelId: 'result-notifications',
     })
     logger.info('Results processed job complete.')
     process.exit(0)
