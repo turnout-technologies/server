@@ -46,7 +46,19 @@ router.get('/leaderboard', async (req, res, next) => {
       cache[sort] = leaderboard
     }
 
+    // Get the dropId
+    let dropId
+    if (cache.dropId) dropId = cache.dropId
+    else {
+      const doc = await db.collection('drops').doc('live').get()
+
+      const drop = doc.data()
+      dropId = drop.id
+      cache.dropId = dropId
+    }
+
     res.status(200).json({
+      dropId,
       leaderboard,
     })
   } catch (err) {
