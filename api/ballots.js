@@ -175,12 +175,12 @@ router.put('/latest/results/self', async (req, res, next) => {
     const ballotId = meta.latestProcessedBallotId
 
     const ballotResults = await getBallotResults(ballotId, req.uid)
-    const { userPoints, response } = ballotResults
+    const { userPoints, response, dropId } = ballotResults
 
     // Add autocorrect field if response exists
     if (!response || !userPoints) throw new Error('User does not have a response for this ballot')
 
-    const { questionId, pointsToAdd, dropId } = req.body
+    const { questionId, pointsToAdd } = req.body
 
     // Update response object to mark question as autocorrected and increment bonus points from that response
     const ballotResponseRef = await db.collection('ballots').doc(ballotId).collection('responses').doc(req.uid)
