@@ -4,7 +4,7 @@ const Joi = require('@hapi/joi')
 const moment = require('moment')
 const db = require('../db')
 
-const referralLevels = [1,5,10,20,35,50,75,100]
+const referralLevels = [1,3,5,10,20,35,50,75,100]
 const referralUpcomingLevels = referralLevels.map(e => e - 1)
 
 const router = Router()
