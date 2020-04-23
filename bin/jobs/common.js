@@ -62,7 +62,8 @@ const retrieveTokens = async () => {
 
 module.exports.sendNotifications = async ({ sound, priority, body, channelId, data }) => {
   try {
-    logger.info('Beginning Push Notifications Job with:', { sound, priority, body, channelId })
+    logger.info('Beginning Push Notifications Job with:')
+    console.log({ sound, priority, body, channelId, data })
 
     const pushTokens = await retrieveTokens()
     logger.info(`Sending Push Notifications to ${pushTokens.length} users...`)

@@ -10,7 +10,7 @@ const startJob = async () => {
       body: 'The results are in! Let\'s see what the winning answers are.',
       channelId: 'poll-notifications',
       data: {
-        type: 'result-notification'
+        type: 'results-notification'
       }
     })
     logger.info('Results processed job complete.')
