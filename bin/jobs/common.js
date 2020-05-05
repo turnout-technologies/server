@@ -27,6 +27,55 @@ const db = admin.firestore()
 // Create a new Expo SDK client
 let expo = new Expo()
 
+
+const retrieveReceipts = async (tickets) => {
+  let receiptIds = [];
+  for (let ticket of tickets) {
+    // NOTE: Not all tickets have IDs; for example, tickets for notifications
+    // that could not be enqueued will have error information and no receipt ID.
+    if (ticket.id) {
+      receiptIds.push(ticket.id)
+    } else {
+      console.error('TICKET NO ID: ')
+      console.log(ticket)
+    }
+  }
+
+  let successCount = 0
+
+  let receiptIdChunks = expo.chunkPushNotificationReceiptIds(receiptIds)
+  // Like sending notifications, there are different strategies you could use
+  // to retrieve batches of receipts from the Expo service.
+  for (let chunk of receiptIdChunks) {
+    let receipts = await expo.getPushNotificationReceiptsAsync(chunk)
+
+    console.log('TICKET RECEIPTS RECEIVED FROM EXPO')
+    console.log(receipts)
+    // The receipts specify whether Apple or Google successfully received the
+    // notification and information about an error, if one occurred.
+    for (const receiptId in receipts) {
+      const { status, message, details } = receipts[receiptId]
+      if (status === "ok") {
+        successCount += 1
+        continue
+      } else if (status === "error") {
+        console.error(
+          `There was an error sending a notification receipt: ${message}`
+        );
+        if (details && details.error) {
+          // The error codes are listed in the Expo documentation:
+          // https://docs.expo.io/versions/latest/guides/push-notifications/#individual-errors
+          // You must handle the errors appropriately.
+          console.error(`The error code is ${details.error}`)
+        }
+      }
+    }
+  }
+  console.log(`Successfully sent ${successCount} push-notifications.`)
+  process.exit(0)
+}
+
+
 module.exports.checkBallotToday = async () => {
   logger.info('Checking if there is a live ballot today...')
   const targetDate = moment.tz(moment.tz(est).format("YYYY-MM-DD") + " 18:00", est)
@@ -66,7 +115,7 @@ module.exports.sendNotifications = async ({ sound, priority, body, channelId, da
     console.log({ sound, priority, body, channelId, data })
 
     const pushTokens = await retrieveTokens()
-    logger.info(`Sending Push Notifications to ${pushTokens.length} users...`)
+    logger.info(`Attempting Push Notifications to ${pushTokens.length} users...`)
     // Create the messages that you want to send to clents
     let messages = []
     for (let pushToken of pushTokens) {
@@ -100,52 +149,24 @@ module.exports.sendNotifications = async ({ sound, priority, body, channelId, da
     // different strategies you could use. A simple one is to send one chunk at a
     // time, which nicely spreads the load out over time:
     for (let chunk of chunks) {
-      let ticketChunk = await expo.sendPushNotificationsAsync(chunk)
-      tickets.push(...ticketChunk)
-    }
-
-    let receiptIds = [];
-    for (let ticket of tickets) {
-      // NOTE: Not all tickets have IDs; for example, tickets for notifications
-      // that could not be enqueued will have error information and no receipt ID.
-      if (ticket.id) {
-        receiptIds.push(ticket.id)
+      try {
+        let ticketChunk = await expo.sendPushNotificationsAsync(chunk)
+        console.log('TICKET CHUNK')
+        console.log(ticketChunk)
+        tickets.push(...ticketChunk)
+      } catch (err) {
+        console.error('TICKET CHUNK ERROR')
+        console.error(err)
       }
     }
 
-    let successCount = 0
-
-    let receiptIdChunks = expo.chunkPushNotificationReceiptIds(receiptIds)
-    // Like sending notifications, there are different strategies you could use
-    // to retrieve batches of receipts from the Expo service.
-    for (let chunk of receiptIdChunks) {
-      let receipts = await expo.getPushNotificationReceiptsAsync(chunk)
-      // The receipts specify whether Apple or Google successfully received the
-      // notification and information about an error, if one occurred.
-      for (const receiptId in receipts) {
-        const { status, message, details } = receipts[receiptId]
-        if (status === "ok") {
-          successCount += 1
-          continue
-        } else if (status === "error") {
-          console.error(
-            `There was an error sending a notification: ${message}`
-          );
-          if (details && details.error) {
-            // The error codes are listed in the Expo documentation:
-            // https://docs.expo.io/versions/latest/guides/push-notifications/#individual-errors
-            // You must handle the errors appropriately.
-            console.error(`The error code is ${details.error}`)
-          }
-        }
-      }
-    }
-
-    console.log(`Successfully sent ${successCount} push-notifications.`)
-
-    process.exit(0)
+    console.log(`${tickets.length} push tickets sent`)
+    setTimeout(async () => {
+      await retrieveReceipts(tickets)
+    }, 60000)
   } catch (err) {
     logger.error(err.message, err)
     process.exit(1)
   }
 }
+

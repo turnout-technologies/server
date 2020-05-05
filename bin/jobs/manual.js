@@ -13,8 +13,6 @@ const startJob = async () => {
       body,
       channelId: 'manual',
     })
-    logger.info('Job complete.')
-    process.exit(0)
   } catch (err) {
     logger.error(err.message, err)
     process.exit(1)

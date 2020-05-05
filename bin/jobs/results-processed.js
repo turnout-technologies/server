@@ -13,8 +13,6 @@ const startJob = async () => {
         type: 'results-notification'
       }
     })
-    logger.info('Results processed job complete.')
-    process.exit(0)
   } catch (err) {
     logger.error(err.message, err)
     process.exit(1)
